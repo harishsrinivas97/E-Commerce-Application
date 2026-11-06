@@ -1,35 +1,25 @@
-
-# Environment variables and secrets
+# Environment files
 .env
 .env.*
+
 !.env.example
 
-# Python virtual environments
-venv/
-env/
+# Python virtual environment
 myvenv/
+venv/
 .venv/
 
 # Python cache
 __pycache__/
-*.py[cod]
-*.pyo
+*.pyc
 
-# Database files
-*.db
-*.sqlite
-*.sqlite3
+# Database
+Database/*.db
 
-# IDE files
+# IDE
 .vscode/
 .idea/
 
-# Operating system files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Uploaded user data
-static/uploads/
+# Upload folders
+static/uploads/admin_profiles/
+static/uploads/user_profiles/
