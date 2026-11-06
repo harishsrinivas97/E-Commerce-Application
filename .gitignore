@@ -1,44 +1,25 @@
-# Python virtual environment
-myvenv/
-venv/
-.venv/
-env/
-ENV/
+# Python cache
+__pycache__/
+*.py[cod]
 
-# Environment variables & secrets
+# Environment variables
 .env
 .env.*
 !.env.example
 
-# Python cache & bytecode
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.pytest_cache/
+# Virtual environments
+myvenv/
+venv/
+.venv/
 
-# SQLite Database files
+# Database
 *.db
 *.sqlite
 *.sqlite3
-Database/*.db
-Database/*.sqlite
-Database/*.sqlite3
 
-# Uploaded runtime media
-static/uploads/*
-
-# IDEs & Editor configurations
+# IDE
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
 
-# Operating System files
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Logs & temporary files
+# Logs
 *.log
