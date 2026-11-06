@@ -1,4 +1,3 @@
-
 # Environment files
 .env
 .env.*
@@ -32,10 +31,9 @@ desktop.ini
 # Node modules
 node_modules/
 
-# Ignore private profile uploads
+# Ignore private profile files but keep folder .gitignore
 static/uploads/admin_profiles/*
-static/uploads/user_profiles/*
+!static/uploads/admin_profiles/.gitignore
 
-# Keep folder structure
-!static/uploads/admin_profiles/.gitkeep
-!static/uploads/user_profiles/.gitkeep
+static/uploads/user_profiles/*
+!static/uploads/user_profiles/.gitignore
