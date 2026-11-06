@@ -177,6 +177,13 @@ def init_db():
     db_dir = os.path.dirname(db_path)
     if db_dir:
         os.makedirs(db_dir, exist_ok=True)
+
+    # Ensure upload directories exist
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    os.makedirs(os.path.join(base_dir, 'static', 'uploads', 'admin_profiles'), exist_ok=True)
+    os.makedirs(os.path.join(base_dir, 'static', 'uploads', 'user_profiles'), exist_ok=True)
+    os.makedirs(os.path.join(base_dir, 'static', 'uploads', 'product_images'), exist_ok=True)
+
     conn = get_db_connection()
     conn.executescript("""
     CREATE TABLE IF NOT EXISTS admin (

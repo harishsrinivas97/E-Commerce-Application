@@ -1,39 +1,44 @@
-# Environment files
-.env
-.env.*
-!.env.example
-
 # Python virtual environment
 myvenv/
 venv/
 .venv/
 env/
+ENV/
 
-# Python cache
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Python cache & bytecode
 __pycache__/
 *.py[cod]
-*.pyo
+*$py.class
+*.so
+.pytest_cache/
 
-# Database
+# SQLite Database files
+*.db
+*.sqlite
+*.sqlite3
 Database/*.db
 Database/*.sqlite
 Database/*.sqlite3
 
-# IDE
+# Uploaded runtime media
+static/uploads/*
+
+# IDEs & Editor configurations
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
-# System files
+# Operating System files
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Node modules
-node_modules/
-
-# Ignore private profile files but keep folder .gitignore
-static/uploads/admin_profiles/*
-!static/uploads/admin_profiles/.gitignore
-
-static/uploads/user_profiles/*
-!static/uploads/user_profiles/.gitignore
+# Logs & temporary files
+*.log
