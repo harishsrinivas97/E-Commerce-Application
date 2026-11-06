@@ -51,14 +51,33 @@
         .header-nav {
             order: 3 !important;
         }
-        .mobile-header-actions {
-            order: 4 !important;
-            flex-shrink: 0 !important;
-            margin-left: 0 !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 8px !important;
+
+        /* Desktop / Laptop Screen Mode: Hide mobile actions, show header nav only */
+        @media (min-width: 992px) {
+            .mobile-header-actions {
+                display: none !important;
+            }
+            .header-nav {
+                display: flex !important;
+                align-items: center !important;
+            }
         }
+
+        /* Tablet & Mobile Screen Mode: Show mobile actions on right edge, hide desktop nav */
+        @media (max-width: 991.98px) {
+            .header-nav {
+                display: none !important;
+            }
+            .mobile-header-actions {
+                display: flex !important;
+                order: 4 !important;
+                flex-shrink: 0 !important;
+                margin-left: 0 !important;
+                align-items: center !important;
+                gap: 8px !important;
+            }
+        }
+
         @media (max-width: 575.98px) {
             .header-inner {
                 height: 56px !important;
