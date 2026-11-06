@@ -1,25 +1,41 @@
+
 # Environment files
 .env
 .env.*
-
 !.env.example
 
 # Python virtual environment
 myvenv/
 venv/
 .venv/
+env/
 
 # Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
 
 # Database
 Database/*.db
+Database/*.sqlite
+Database/*.sqlite3
 
 # IDE
 .vscode/
 .idea/
 
-# Upload folders
-static/uploads/admin_profiles/
-static/uploads/user_profiles/
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node modules
+node_modules/
+
+# Ignore private profile uploads
+static/uploads/admin_profiles/*
+static/uploads/user_profiles/*
+
+# Keep folder structure
+!static/uploads/admin_profiles/.gitkeep
+!static/uploads/user_profiles/.gitkeep
