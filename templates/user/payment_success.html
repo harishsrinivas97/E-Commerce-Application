@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Payment Successful | Zing-Zing{% endblock %}
+
+{% block content %}
+<div class="success-container">
+    <div class="success-card">
+
+        <!-- SUCCESS ICON -->
+        <div class="success-icon">
+            <i class="fa-solid fa-check"></i>
+        </div>
+
+        <h1>Payment Successful!</h1>
+        <p class="success-message">
+            Your order has been placed successfully.<br>
+            Thank you for shopping with <strong style="color:var(--accent);">Zing-Zing</strong>!
+        </p>
+
+        <!-- PAYMENT DETAILS -->
+        <div class="success-details">
+            <h3><i class="fa-solid fa-receipt" style="color:var(--accent);margin-right:.4rem;"></i> Payment Information</h3>
+
+            <p>
+                <strong>Order ID</strong>
+                <span>#{{ database_order_id }}</span>
+            </p>
+            <p>
+                <strong>Razorpay Order ID</strong>
+                <span style="font-size:.82rem;word-break:break-all;">{{ order_id }}</span>
+            </p>
+            <p>
+                <strong>Payment ID</strong>
+                <span style="font-size:.82rem;word-break:break-all;">{{ payment_id }}</span>
+            </p>
+            <p>
+                <strong>Payment Status</strong>
+                <span class="paid-status"><i class="fa-solid fa-circle-check"></i> PAID</span>
+            </p>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="row g-2 success-actions">
+
+            <div class="col-12 col-sm-4">
+                <a href="{{ url_for('download_invoice', order_id=database_order_id) }}"
+                   class="invoice-btn w-100">
+                    <i class="fa-solid fa-file-pdf"></i> Download Invoice
+                </a>
+            </div>
+
+            <div class="col-12 col-sm-4">
+                <a href="{{ url_for('my_orders') }}" class="orders-btn w-100">
+                    <i class="fa-solid fa-box"></i> My Orders
+                </a>
+            </div>
+
+            <div class="col-12 col-sm-4">
+                <a href="{{ url_for('user_dashboard') }}" class="continue-btn w-100">
+                    <i class="fa-solid fa-cart-shopping"></i> Shop More
+                </a>
+            </div>
+
+        </div>
+
+        <p style="font-size:.8rem;color:var(--text-muted);margin-top:1.5rem;margin-bottom:0;">
+            <i class="fa-solid fa-circle-info" style="color:var(--accent);margin-right:4px;"></i>
+            A PDF invoice is available for download above and from your Orders page.
+        </p>
+
+    </div>
+</div>
+{% endblock %}

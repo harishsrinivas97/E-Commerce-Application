@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% block title %}Checkout | Zing-Zing{% endblock %}
+
+{% block content %}
+<section class="checkout-page">
+
+    <!-- HEADING -->
+    <div class="section-heading checkout-heading">
+        <div>
+            <p class="eyebrow">ZING-ZING CHECKOUT</p>
+            <h1>Complete Your Order</h1>
+            <p>Enter your delivery details to proceed to payment.</p>
+        </div>
+        <a href="{{ url_for('view_cart') }}" class="button secondary">
+            <i class="fa-solid fa-arrow-left"></i> Back to Cart
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- LEFT: DELIVERY ADDRESS FORM -->
+        <div class="col-12 col-lg-7">
+            <div class="checkout-card">
+
+                <div class="checkout-card-heading">
+                    <div class="checkout-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div>
+                        <h2>Delivery Address</h2>
+                        <p>Where should we deliver your products?</p>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('save_delivery_address') }}" class="address-form">
+
+                    <div class="row g-3">
+                        <!-- FULL NAME -->
+                        <div class="col-12 col-md-6">
+                            <label for="full_name" class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary text-muted">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                                <input type="text" id="full_name" name="full_name" class="form-control"
+                                       placeholder="e.g. John Doe"
+                                       value="{{ saved_address.get('full_name', '') }}" required>
+                            </div>
+                        </div>
+
+                        <!-- MOBILE NUMBER -->
+                        <div class="col-12 col-md-6">
+                            <label for="phone" class="form-label fw-semibold small">Mobile Number <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary text-muted">
+                                    <i class="fa-solid fa-phone"></i>
+                                </span>
+                                <input type="tel" id="phone" name="phone" class="form-control"
+                                       placeholder="10-digit mobile number"
+                                       pattern="[0-9]{10}" maxlength="10"
+                                       value="{{ saved_address.get('phone', '') }}" required>
+                            </div>
+                        </div>
+
+                        <!-- HOUSE / STREET ADDRESS -->
+                        <div class="col-12">
+                            <label for="address_line" class="form-label fw-semibold small">House No. / Flat / Building / Street Address <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary text-muted">
+                                    <i class="fa-solid fa-house"></i>
+                                </span>
+                                <textarea id="address_line" name="address_line" class="form-control" rows="2"
+                                          placeholder="Flat, House no., Building, Company, Apartment, Street" required>{{ saved_address.get('address_line', '') }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- CITY -->
+                        <div class="col-12 col-sm-6">
+                            <label for="city" class="form-label fw-semibold small">Town / City <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary text-muted">
+                                    <i class="fa-solid fa-city"></i>
+                                </span>
+                                <input type="text" id="city" name="city" class="form-control"
+                                       placeholder="City / District"
+                                       value="{{ saved_address.get('city', '') }}" required>
+                            </div>
+                        </div>
+
+                        <!-- STATE -->
+                        <div class="col-12 col-sm-6">
+                            <label for="state" class="form-label fw-semibold small">State <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary text-muted">
+                                    <i class="fa-solid fa-map"></i>
+                                </span>
+                                <input type="text" id="state" name="state" class="form-control"
+                                       placeholder="State"
+                                       value="{{ saved_address.get('state', '') }}" required>
+                            </div>
+                        </div>
+
+                        <!-- PINCODE -->
+                        <div class="col-12 col-sm-6">
+                            <label for="pincode" class="form-label fw-semibold small">Pincode (6 digits) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary text-muted">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </span>
+                                <input type="text" id="pincode" name="pincode" class="form-control"
+                                       placeholder="6-digit pincode"
+                                       pattern="[0-9]{6}" maxlength="6"
+                                       value="{{ saved_address.get('pincode', '') }}" required>
+                            </div>
+                        </div>
+
+                        <!-- LANDMARK -->
+                        <div class="col-12 col-sm-6">
+                            <label for="landmark" class="form-label fw-semibold small">Landmark <span class="text-muted fw-normal">(Optional)</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary text-muted">
+                                    <i class="fa-solid fa-map-pin"></i>
+                                </span>
+                                <input type="text" id="landmark" name="landmark" class="form-control"
+                                       placeholder="e.g. Near Apollo Pharmacy"
+                                       value="{{ saved_address.get('landmark', '') }}">
+                            </div>
+                        </div>
+
+                        <!-- SUBMIT BUTTON -->
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-3 shadow-sm">
+                                <i class="fa-solid fa-shield-halved me-2"></i> Deliver to this Address &bull; Continue to Payment
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+
+                {% if saved_address %}
+                <div class="address-saved-message mt-3">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Your delivery address is saved. Click above to update or continue.
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <!-- RIGHT: ORDER SUMMARY -->
+        <div class="col-12 col-lg-5">
+            <div class="checkout-card">
+
+                <div class="checkout-card-heading">
+                    <div class="checkout-icon">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+                    <div>
+                        <h2>Order Summary</h2>
+                        <p>Your selected products</p>
+                    </div>
+                </div>
+
+                <!-- PRODUCT LIST -->
+                {% for pid, item in selected_items.items() %}
+                <div class="d-flex align-items-center gap-2 py-2" style="border-bottom:1px solid var(--border);">
+                    {% if item.image %}
+                        {% if item.image.startswith('http://') or item.image.startswith('https://') %}
+                            <img src="{{ item.image }}" alt="{{ item.name }}"
+                                 style="width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--border);flex-shrink:0;">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/product_images/' ~ item.image.split('/')[-1]) }}"
+                                 alt="{{ item.name }}"
+                                 style="width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--border);flex-shrink:0;"
+                                 onerror="this.src='https://placehold.co/44x44/1C2436/8B5CF6?text=Z';">
+                        {% endif %}
+                    {% else %}
+                        <div style="width:44px;height:44px;border-radius:8px;background:var(--elevated);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:.9rem;border:1px solid var(--border);flex-shrink:0;">
+                            <i class="fa-regular fa-image"></i>
+                        </div>
+                    {% endif %}
+                    <div class="flex-grow-1" style="min-width:0;">
+                        <div style="font-size:.875rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.name }}</div>
+                        <div style="font-size:.78rem;color:var(--text-muted);">Qty: {{ item.quantity }} × ₹{{ "%.2f"|format(item.price|float) }}</div>
+                    </div>
+                    <div style="font-size:.9rem;font-weight:700;color:var(--accent);white-space:nowrap;">
+                        ₹{{ "%.2f"|format(item.price|float * item.quantity|int) }}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="checkout-summary-row mt-3">
+                    <span>Selected Products</span>
+                    <strong>{{ selected_items|length }}</strong>
+                </div>
+                <div class="checkout-summary-row">
+                    <span>Total Items</span>
+                    <strong>{{ selected_count }}</strong>
+                </div>
+
+                <div class="checkout-divider"></div>
+
+                <div class="checkout-total">
+                    <span>Total Amount</span>
+                    <strong style="font-size:1.2rem;color:var(--accent);">
+                        ₹{{ "%.2f"|format(selected_total) }}
+                    </strong>
+                </div>
+
+                <div class="checkout-info">
+                    <i class="fa-solid fa-shield-halved" style="color:var(--accent-2);"></i>
+                    Secure checkout powered by Razorpay
+                </div>
+
+                <a href="{{ url_for('view_cart') }}" class="button secondary checkout-back-btn w-100">
+                    <i class="fa-solid fa-pen"></i> Modify Cart
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+
+</section>
+{% endblock %}

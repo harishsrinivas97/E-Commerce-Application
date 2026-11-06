@@ -1,0 +1,127 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Dashboard | Zing-Zing Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <p class="eyebrow">OVERVIEW</p>
+    <h1 style="font-size:1.75rem;">Welcome back, {{ admin_name }}!</h1>
+    <p class="text-muted mb-0">Here's a summary of your Zing-Zing store.</p>
+</div>
+
+<!-- STATS -->
+<div class="row g-3 mb-4">
+
+    <div class="col-6 col-md-3">
+        <div class="stat-card h-100">
+            <div class="stat-icon purple"><i class="fa-solid fa-box-open"></i></div>
+            <div class="stat-label">Total Products</div>
+            <div class="stat-value">{{ stats.total_products if stats else '—' }}</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="stat-card h-100">
+            <div class="stat-icon cyan"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-label">Total Customers</div>
+            <div class="stat-value">{{ stats.total_customers if stats else '—' }}</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="stat-card h-100">
+            <div class="stat-icon green"><i class="fa-solid fa-bag-shopping"></i></div>
+            <div class="stat-label">Total Orders</div>
+            <div class="stat-value">{{ stats.total_orders if stats else '—' }}</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="stat-card h-100">
+            <div class="stat-icon orange"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value">
+                {% if stats and stats.total_revenue %}
+                    ₹{{ "%.0f"|format(stats.total_revenue) }}
+                {% else %}—{% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- QUICK ACTIONS -->
+<div class="mb-4">
+    <p class="eyebrow">QUICK ACTIONS</p>
+    <h2 style="font-size:1.15rem;" class="mb-3">Manage Your Store</h2>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="/admin/add-item" class="button">
+            <i class="fa-solid fa-plus"></i> Add New Product
+        </a>
+        <a href="/admin/item-list" class="button secondary">
+            <i class="fa-solid fa-list"></i> View Product List
+        </a>
+        <a href="/admin/profile" class="button secondary">
+            <i class="fa-solid fa-user"></i> My Profile
+        </a>
+    </div>
+</div>
+
+<!-- RECENT PRODUCTS -->
+{% if recent_products %}
+<div>
+    <p class="eyebrow">STORE</p>
+    <h2 style="font-size:1.15rem;" class="mb-3">Recent Products</h2>
+
+    <div class="admin-table-wrap">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in recent_products %}
+                    <tr>
+                        <td>
+                            {% if product.image %}
+                                <img class="table-product-img"
+                                     src="{{ url_for('static', filename='uploads/product_images/' ~ product.image.split('/')[-1]) }}"
+                                     alt="{{ product.name }}"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                <div class="table-img-placeholder" style="display:none;"><i class="fa-regular fa-image"></i></div>
+                            {% else %}
+                                <div class="table-img-placeholder"><i class="fa-regular fa-image"></i></div>
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ product.name }}</strong></td>
+                        <td><span style="color:var(--text-muted);font-size:.85rem;">{{ product.category or '—' }}</span></td>
+                        <td><strong>₹{{ "%.2f"|format(product.price|float) }}</strong></td>
+                        <td>
+                            <div class="table-actions">
+                                <a href="/admin/update-item/{{ product.product_id }}" class="btn-xs btn-edit">
+                                    <i class="fa-solid fa-pen"></i> Edit
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <a href="/admin/item-list" class="button secondary mt-3 d-inline-flex">
+        View All Products <i class="fa-solid fa-arrow-right"></i>
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}

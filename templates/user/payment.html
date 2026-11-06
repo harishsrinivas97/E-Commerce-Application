@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% block title %}Payment | Zing-Zing{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+
+    <div style="margin-bottom:1.5rem;">
+        <p class="eyebrow">SECURE PAYMENT</p>
+        <h1 class="checkout-title">Review &amp; Pay</h1>
+        <p>Confirm your order details and complete your payment.</p>
+    </div>
+
+    <div class="row g-4 checkout-layout">
+
+        <!-- LEFT: ORDER SUMMARY -->
+        <div class="col-12 col-lg-7 order-section">
+            <div class="checkout-card">
+
+                <h2 style="font-size:1.15rem;margin-bottom:1.25rem;">
+                    <i class="fa-solid fa-bag-shopping" style="color:var(--accent);margin-right:.4rem;"></i>
+                    Order Summary
+                </h2>
+
+                {% for pid, item in selected_items.items() %}
+                <div class="product-item">
+
+                    {% if item.image %}
+                        {% if item.image.startswith('http://') or item.image.startswith('https://') %}
+                            <img src="{{ item.image }}" class="product-image" alt="{{ item.name }}"
+                                 onerror="this.src='https://placehold.co/70x70/1C2436/8B5CF6?text=Z';">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/product_images/' ~ item.image.split('/')[-1]) }}"
+                                 class="product-image" alt="{{ item.name }}"
+                                 onerror="this.src='https://placehold.co/70x70/1C2436/8B5CF6?text=Z';">
+                        {% endif %}
+                    {% else %}
+                        <img src="https://placehold.co/70x70/1C2436/8B5CF6?text=Z"
+                             class="product-image" alt="Product">
+                    {% endif %}
+
+                    <div class="product-details">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 style="font-size:1rem;font-weight:600;margin-bottom:0.25rem;">{{ item.name }}</h3>
+                                <p class="mb-0 text-muted small">
+                                    Qty: <strong style="color:var(--text);">{{ item.quantity }}</strong>
+                                    <span class="mx-1">•</span>
+                                    ₹{{ "%.2f"|format(item.price|float) }} each
+                                </p>
+                            </div>
+                            <div class="text-end ps-3" style="white-space:nowrap;">
+                                <div class="text-muted small text-uppercase" style="font-size:0.7rem;letter-spacing:0.5px;">Subtotal</div>
+                                <strong style="color:var(--accent);font-size:1.1rem;font-weight:800;">
+                                    ₹{{ "%.2f"|format(item.price|float * item.quantity|int) }}
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                {% endfor %}
+
+                <div class="price-details">
+                    <span>Grand Total</span>
+                    <strong style="font-size:1.3rem;color:var(--accent);">
+                        ₹{{ "%.2f"|format(total_amount|float) }}
+                    </strong>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- RIGHT: ADDRESS + PAYMENT -->
+        <div class="col-12 col-lg-5 payment-section">
+
+            <!-- DELIVERY ADDRESS -->
+            <div class="checkout-card mb-4">
+
+                <div class="card-heading">
+                    <h2 style="font-size:1.1rem;">
+                        <i class="fa-solid fa-location-dot" style="color:var(--accent);margin-right:.4rem;"></i>
+                        Delivery Address
+                    </h2>
+                    <button type="button" class="edit-btn" id="edit-address-btn" onclick="showAddressForm()">
+                        <i class="fa-solid fa-pen"></i> Edit
+                    </button>
+                </div>
+
+                <!-- DISPLAY -->
+                <div id="address-display">
+                    {% if delivery_address %}
+                        <h3 style="margin-bottom:.35rem;">{{ delivery_address.full_name }}</h3>
+                        <p style="margin-bottom:.2rem;color:var(--text-muted);font-size:.875rem;">
+                            <i class="fa-solid fa-phone" style="color:var(--accent-2);margin-right:.3rem;"></i>{{ delivery_address.phone }}
+                        </p>
+                        <p style="color:var(--text-muted);font-size:.875rem;line-height:1.6;">
+                            {{ delivery_address.address_line }},<br>
+                            {{ delivery_address.city }}, {{ delivery_address.state }} - {{ delivery_address.pincode }}
+                        </p>
+                        {% if delivery_address.landmark %}
+                            <p style="color:var(--text-muted);font-size:.8rem;margin-top:.3rem;">
+                                Landmark: {{ delivery_address.landmark }}
+                            </p>
+                        {% endif %}
+                    {% else %}
+                        <p style="color:var(--danger);">No delivery address found. Please go back and add one.</p>
+                    {% endif %}
+                </div>
+
+                <!-- EDIT FORM (hidden) -->
+                <form id="address-form" action="{{ url_for('save_delivery_address') }}" method="POST" style="display:none;">
+
+                    <div class="d-flex flex-column gap-2 mt-3">
+                        <input type="text" name="full_name" class="form-control" placeholder="Full Name"
+                               value="{{ delivery_address.full_name if delivery_address else '' }}" required>
+                        <input type="tel" name="phone" class="form-control" placeholder="Phone Number"
+                               value="{{ delivery_address.phone if delivery_address else '' }}" required>
+                        <textarea name="address_line" class="form-control" placeholder="House No, Street, Area" rows="2" required>{{ delivery_address.address_line if delivery_address else '' }}</textarea>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="text" name="city" class="form-control" placeholder="City"
+                                       value="{{ delivery_address.city if delivery_address else '' }}" required>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" name="state" class="form-control" placeholder="State"
+                                       value="{{ delivery_address.state if delivery_address else '' }}" required>
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="text" name="pincode" class="form-control" placeholder="Pincode"
+                                       value="{{ delivery_address.pincode if delivery_address else '' }}" required>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" name="landmark" class="form-control" placeholder="Landmark (Optional)"
+                                       value="{{ delivery_address.landmark if delivery_address else '' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="address-actions mt-3 d-flex gap-2">
+                        <button type="submit" class="save-btn flex-grow-1">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Address
+                        </button>
+                        <button type="button" class="cancel-btn" onclick="hideAddressForm()">
+                            Cancel
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+            <!-- PAYMENT -->
+            <div class="checkout-card">
+
+                <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+                    <i class="fa-solid fa-lock" style="color:var(--success);margin-right:.4rem;"></i>
+                    Secure Payment
+                </h2>
+
+                <div class="payment-total">
+                    <span>Amount to Pay</span>
+                    <strong style="color:var(--accent);font-size:1.4rem;">
+                        ₹{{ "%.2f"|format(total_amount|float) }}
+                    </strong>
+                </div>
+
+                <!-- TRUST BADGES -->
+                <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem;">
+                    <span style="font-size:.75rem;color:var(--text-muted);display:flex;align-items:center;gap:.3rem;">
+                        <i class="fa-solid fa-shield-halved" style="color:var(--success);"></i> 256-bit SSL
+                    </span>
+                    <span style="font-size:.75rem;color:var(--text-muted);display:flex;align-items:center;gap:.3rem;">
+                        <i class="fa-solid fa-lock" style="color:var(--accent-2);"></i> Razorpay Secured
+                    </span>
+                </div>
+
+                <button type="button" id="rzp-button" class="pay-btn"
+                        data-key="{{ razorpay_key_id }}"
+                        data-amount="{{ razorpay_amount }}"
+                        data-order-id="{{ razorpay_order_id }}"
+                        data-success-url="{{ url_for('payment_success') }}"
+                        onclick="openRazorpay()">
+                    <i class="fa-solid fa-bolt"></i>
+                    Pay Now — ₹{{ "%.2f"|format(total_amount|float) }}
+                </button>
+
+                <p class="secure-payment">
+                    <i class="fa-solid fa-lock"></i> Secure payment powered by Razorpay
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+function showAddressForm() {
+    document.getElementById('address-display').style.display = 'none';
+    document.getElementById('address-form').style.display = 'block';
+    document.getElementById('edit-address-btn').style.display = 'none';
+}
+
+function hideAddressForm() {
+    document.getElementById('address-form').style.display = 'none';
+    document.getElementById('address-display').style.display = 'block';
+    document.getElementById('edit-address-btn').style.display = 'inline-flex';
+}
+
+function openRazorpay() {
+    const btn = document.getElementById('rzp-button');
+    const keyId     = btn.dataset.key;
+    const amount    = Number(btn.dataset.amount);
+    const orderId   = btn.dataset.orderId;
+    const successUrl= btn.dataset.successUrl;
+
+    if (!keyId || !amount || !orderId || !successUrl) {
+        alert('Payment details are missing. Please refresh the page.');
+        return;
+    }
+
+    const options = {
+        key:         keyId,
+        amount:      amount,
+        currency:    'INR',
+        name:        'Zing-Zing',
+        description: 'Order Payment',
+        order_id:    orderId,
+
+        handler: function(response) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = successUrl;
+
+            ['razorpay_payment_id','razorpay_order_id','razorpay_signature'].forEach(function(key) {
+                const input = document.createElement('input');
+                input.type  = 'hidden';
+                input.name  = key;
+                input.value = response[key];
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+        },
+
+        theme: { color: '#8B5CF6' }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', function(r) {
+        alert('Payment failed: ' + r.error.description);
+    });
+    rzp.open();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% block title %}Welcome to Zing-Zing | Online Shopping Store{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════ HERO WELCOME SECTION ═══════════════════ -->
+<section class="hero-normal-section">
+    <div class="container-fluid">
+        <div class="hero-normal-card">
+            <div class="row align-items-center g-4">
+                
+                <div class="col-12 col-lg-7">
+                    <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 rounded-pill mb-3">
+                        <i class="fa-solid fa-sparkles me-1"></i> Welcome to Zing-Zing Store
+                    </span>
+                    <h1 class="hero-normal-title">
+                        Discover Quality Products at Genuine Prices
+                    </h1>
+                    <p class="hero-normal-desc">
+                        Explore our curated collection of electronics, fashion, home essentials, and lifestyle products with doorstep delivery across India.
+                    </p>
+
+                    <!-- DIRECT LOGIN BUTTONS -->
+                    <div class="hero-normal-buttons d-flex flex-wrap align-items-center gap-3 mt-4">
+                        <a href="/user-login" class="btn btn-primary btn-lg px-4 py-2 fw-semibold">
+                            <i class="fa-solid fa-user me-2"></i> Customer Login
+                        </a>
+                        <a href="/admin-login" class="btn btn-outline-secondary btn-lg px-4 py-2 fw-semibold">
+                            <i class="fa-solid fa-user-shield me-2"></i> Admin Login
+                        </a>
+                        <a href="/user-register" class="btn btn-light btn-lg px-4 py-2 border fw-semibold">
+                            <i class="fa-solid fa-user-plus me-1"></i> Register Free
+                        </a>
+                    </div>
+
+                    <div class="mt-3 text-muted small">
+                        <i class="fa-solid fa-circle-check text-success me-1"></i> Safe &amp; Secure Shopping &bull; Fast Delivery &bull; Easy Returns
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-5 text-center">
+                    <div class="hero-graphic-box">
+                        <div class="hero-graphic-icon">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </div>
+                        <h4 class="mt-3 fw-bold">Shop With Confidence</h4>
+                        <p class="text-muted small mb-3">Login to browse all products, view prices, add items to cart, and enjoy seamless online checkout.</p>
+                        <a href="/user-login" class="btn btn-sm btn-primary px-3">
+                            Start Shopping Now <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ CATEGORIES OVERVIEW ═══════════════════ -->
+<section class="section-normal">
+    <div class="container-fluid">
+        <div class="section-normal-header">
+            <div>
+                <h3 class="fw-bold mb-1">Browse Categories</h3>
+                <p class="text-muted small mb-0">Explore our most popular departments</p>
+            </div>
+            <a href="/user-login" class="text-primary text-decoration-none fw-semibold small">
+                View All Categories <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-6 col-sm-4 col-md-2">
+                <a href="/user-login" class="category-normal-card">
+                    <div class="category-normal-icon bg-info-subtle text-info">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                    </div>
+                    <span class="category-normal-name">Mobiles</span>
+                </a>
+            </div>
+
+            <div class="col-6 col-sm-4 col-md-2">
+                <a href="/user-login" class="category-normal-card">
+                    <div class="category-normal-icon bg-primary-subtle text-primary">
+                        <i class="fa-solid fa-laptop"></i>
+                    </div>
+                    <span class="category-normal-name">Electronics</span>
+                </a>
+            </div>
+
+            <div class="col-6 col-sm-4 col-md-2">
+                <a href="/user-login" class="category-normal-card">
+                    <div class="category-normal-icon bg-danger-subtle text-danger">
+                        <i class="fa-solid fa-shirt"></i>
+                    </div>
+                    <span class="category-normal-name">Fashion</span>
+                </a>
+            </div>
+
+            <div class="col-6 col-sm-4 col-md-2">
+                <a href="/user-login" class="category-normal-card">
+                    <div class="category-normal-icon bg-success-subtle text-success">
+                        <i class="fa-solid fa-couch"></i>
+                    </div>
+                    <span class="category-normal-name">Home &amp; Decor</span>
+                </a>
+            </div>
+
+            <div class="col-6 col-sm-4 col-md-2">
+                <a href="/user-login" class="category-normal-card">
+                    <div class="category-normal-icon bg-warning-subtle text-warning">
+                        <i class="fa-solid fa-blender"></i>
+                    </div>
+                    <span class="category-normal-name">Appliances</span>
+                </a>
+            </div>
+
+            <div class="col-6 col-sm-4 col-md-2">
+                <a href="/user-login" class="category-normal-card">
+                    <div class="category-normal-icon bg-secondary-subtle text-secondary">
+                        <i class="fa-solid fa-gift"></i>
+                    </div>
+                    <span class="category-normal-name">Toys &amp; Gifts</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ FEATURES / WHY CHOOSE US ═══════════════════ -->
+<section class="section-normal pt-2">
+    <div class="container-fluid">
+        <div class="row g-3">
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="feature-normal-card">
+                    <div class="feature-normal-icon text-primary">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Fast Delivery</h5>
+                    <p class="text-muted small mb-0">Free doorstep delivery on eligible orders above ₹499.</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="feature-normal-card">
+                    <div class="feature-normal-icon text-success">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Secure Payments</h5>
+                    <p class="text-muted small mb-0">100% secure online transactions powered by Razorpay.</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="feature-normal-card">
+                    <div class="feature-normal-icon text-warning">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Easy Returns</h5>
+                    <p class="text-muted small mb-0">Hassle-free 7-day replacement guarantee on all purchases.</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="feature-normal-card">
+                    <div class="feature-normal-icon text-info">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Instant Invoices</h5>
+                    <p class="text-muted small mb-0">Download official PDF GST invoices for your records.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ BOTTOM CALL TO ACTION ═══════════════════ -->
+<section class="section-normal py-4">
+    <div class="container-fluid">
+        <div class="cta-normal-box">
+            <h3 class="fw-bold mb-2">Ready to Start Shopping?</h3>
+            <p class="text-muted mb-3" style="max-width:550px;margin:0 auto;">Sign in to your customer account to browse all products, manage your cart, and place orders.</p>
+            <div class="d-flex justify-content-center flex-wrap gap-2">
+                <a href="/user-login" class="btn btn-primary px-4 fw-semibold">
+                    <i class="fa-solid fa-user me-1"></i> Customer Login
+                </a>
+                <a href="/user-register" class="btn btn-outline-primary px-4 fw-semibold">
+                    <i class="fa-solid fa-user-plus me-1"></i> Create Free Account
+                </a>
+                <a href="/admin-login" class="btn btn-outline-secondary px-3 fw-semibold">
+                    <i class="fa-solid fa-user-shield me-1"></i> Admin Login
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}My Orders | Zing-Zing Store{% endblock %}
+
+{% block content %}
+<div class="my-orders-container">
+
+    <!-- PAGE HEADING -->
+    <div class="orders-heading mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">My Orders</h1>
+            <p class="text-muted small mb-0">Track delivery status and download official invoices</p>
+        </div>
+        <a href="{{ url_for('user_dashboard') }}" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1">
+            <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+        </a>
+    </div>
+
+    {% if orders %}
+
+        {% for order in orders %}
+        <article class="order-card mb-3">
+
+            <!-- 1. ORDER CARD HEADER -->
+            <div class="order-card-header">
+                <div class="order-header-meta">
+                    <span class="order-id-badge">Order #{{ order.order_id }}</span>
+                    <span class="text-muted small">&bull;</span>
+                    <span class="order-date-text text-muted">
+                        <i class="fa-regular fa-calendar me-1"></i>
+                        {{ order.created_at.strftime('%d %b %Y, %I:%M %p') if order.created_at and order.created_at.strftime is defined else order.created_at }}
+                    </span>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 small">
+                        <i class="fa-solid fa-circle-check me-1"></i> {{ order.payment_status }}
+                    </span>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-1 small">
+                        <i class="fa-solid fa-box me-1"></i> {{ order.order_status }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- 2. ORDER PRODUCTS -->
+            <div class="order-card-body">
+                {% for item in order['items'] %}
+                <div class="order-item-row">
+
+                    <!-- Product Thumbnail -->
+                    <div class="order-item-img-box">
+                        <a href="/user-product/{{ item.product_id }}" title="View {{ item.product_name }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;">
+                        {% if item.product_image %}
+                            {% if item.product_image.startswith('http://') or item.product_image.startswith('https://') %}
+                                <img src="{{ item.product_image }}"
+                                     alt="{{ item.product_name }}"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='uploads/product_images/' ~ item.product_image.split('/')[-1]) }}"
+                                     alt="{{ item.product_name }}"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                            {% endif %}
+                            <div class="no-img-placeholder" style="display:none;"><i class="fa-regular fa-image"></i></div>
+                        {% else %}
+                            <div class="no-img-placeholder"><i class="fa-regular fa-image"></i></div>
+                        {% endif %}
+                        </a>
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="order-item-content">
+                        <h5 class="order-item-name">
+                            <a href="/user-product/{{ item.product_id }}" style="color:inherit;text-decoration:none;" title="View product details">
+                                {{ item.product_name }}
+                            </a>
+                        </h5>
+                        <div class="order-item-meta text-muted">
+                            <span>Qty: <strong class="text-body fw-bold">{{ item.quantity }}</strong></span>
+                            <span class="mx-2 text-muted">&bull;</span>
+                            <span>Unit Price: ₹{{ "%.2f"|format(item.price|float) }}</span>
+                            <span class="mx-2 text-muted">&bull;</span>
+                            <span>Subtotal: <strong class="text-primary">₹{{ "%.2f"|format(item.subtotal|float) }}</strong></span>
+                        </div>
+                    </div>
+
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- 3. DELIVERY ADDRESS SUMMARY -->
+            {% if order.full_name or order.address_line %}
+            <div class="order-delivery-bar">
+                <div class="d-flex align-items-start gap-2">
+                    <i class="fa-solid fa-location-dot text-primary mt-1" style="font-size:.85rem;"></i>
+                    <div class="small" style="line-height:1.4;">
+                        <span class="fw-bold">{{ order.full_name or 'Customer' }}</span>
+                        {% if order.phone %}<span class="text-muted ms-1">| {{ order.phone }}</span>{% endif %}
+                        <div class="text-muted">
+                            {{ order.address_line }}{% if order.city %}, {{ order.city }}{% endif %}{% if order.state %}, {{ order.state }}{% endif %}{% if order.pincode %} - {{ order.pincode }}{% endif %}
+                            {% if order.landmark %}<span class="ms-1">(Landmark: {{ order.landmark }})</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 4. ORDER FOOTER: TOTAL + ACTION BUTTONS -->
+            <div class="order-card-footer">
+                <div class="order-total-block">
+                    <span class="order-total-label text-muted small">Total Paid:</span>
+                    <span class="order-total-amount text-primary fw-bold">₹{{ "%.2f"|format(order.total_amount|float) }}</span>
+                </div>
+                <div class="order-actions-block d-flex gap-2">
+                    {% if order.payment_status == 'PAID' %}
+                    <a href="{{ url_for('download_invoice', order_id=order.order_id) }}" class="btn btn-outline-primary btn-sm px-3 fw-semibold d-inline-flex align-items-center gap-1">
+                        <i class="fa-solid fa-file-pdf"></i> Download Invoice
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('user_dashboard') }}" class="btn btn-primary btn-sm px-3 fw-semibold d-inline-flex align-items-center gap-1">
+                        <i class="fa-solid fa-bag-shopping"></i> Shop Again
+                    </a>
+                </div>
+            </div>
+
+        </article>
+        {% endfor %}
+
+    {% else %}
+
+    <!-- EMPTY ORDERS STATE -->
+    <div class="empty-orders text-center py-5">
+        <div class="mb-3 text-muted" style="font-size:3rem;opacity:.5;">
+            <i class="fa-solid fa-box-open"></i>
+        </div>
+        <h4 class="fw-bold">No Orders Yet</h4>
+        <p class="text-muted small">You haven't purchased anything yet. Browse our store to make your first purchase.</p>
+        <a href="{{ url_for('user_dashboard') }}" class="btn btn-primary btn-sm px-4 py-2 mt-2">
+            <i class="fa-solid fa-store me-1"></i> Start Shopping
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}

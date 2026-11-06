@@ -1,0 +1,138 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Product List | Zing-Zing Admin{% endblock %}
+{% block page_title %}Product List{% endblock %}
+
+{% block content %}
+
+<div class="admin-table-wrap">
+
+    <!-- HEADER + SEARCH -->
+    <div class="admin-table-header flex-wrap gap-3">
+
+        <div>
+            <p class="eyebrow">INVENTORY</p>
+            <h2 style="font-size:1.15rem;" class="mb-0">All Products</h2>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+
+            <!-- SEARCH FORM -->
+            <form method="GET" action="/admin/item-list" class="admin-search-bar d-flex gap-2 flex-wrap align-items-center">
+
+                <input type="text"
+                       name="search"
+                       class="form-control form-control-sm"
+                       placeholder="Search products..."
+                       value="{{ request.args.get('search', '') }}"
+                       style="width:200px;">
+
+                <select name="category" class="form-control form-control-sm" style="width:160px;">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.category }}"
+                            {% if request.args.get('category') == cat.category %}selected{% endif %}>
+                            {{ cat.category }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="button" style="padding:.6rem 1rem;">
+                    <i class="fa-solid fa-magnifying-glass"></i> Search
+                </button>
+
+                {% if request.args.get('search') or request.args.get('category') %}
+                    <a href="/admin/item-list" class="button secondary" style="padding:.6rem 1rem;">
+                        <i class="fa-solid fa-xmark"></i> Clear
+                    </a>
+                {% endif %}
+
+            </form>
+
+            <a href="/admin/add-item" class="button">
+                <i class="fa-solid fa-plus"></i> Add Product
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    {% if products %}
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>
+                        <a href="/admin/view-item/{{ product.product_id }}" title="View product details">
+                            {% if product.image %}
+                                <img class="table-product-img"
+                                     src="{{ url_for('static', filename='uploads/product_images/' ~ product.image.split('/')[-1]) }}"
+                                     alt="{{ product.name }}"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                <div class="table-img-placeholder" style="display:none;"><i class="fa-regular fa-image"></i></div>
+                            {% else %}
+                                <div class="table-img-placeholder"><i class="fa-regular fa-image"></i></div>
+                            {% endif %}
+                        </a>
+                    </td>
+                    <td style="color:var(--text-muted);font-size:.82rem;">#{{ product.product_id }}</td>
+                    <td>
+                        <a href="/admin/view-item/{{ product.product_id }}" style="color:inherit;text-decoration:none;" title="View product details">
+                            <strong style="font-size:.9rem;">{{ product.name }}</strong>
+                        </a>
+                    </td>
+                    <td>
+                        <span style="background:rgba(34,211,238,.1);color:var(--accent-2);border:1px solid rgba(34,211,238,.2);padding:.2rem .6rem;border-radius:99px;font-size:.75rem;font-weight:600;">
+                            {{ product.category or '—' }}
+                        </span>
+                    </td>
+                    <td><strong>₹{{ "%.2f"|format(product.price|float) }}</strong></td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="/admin/view-item/{{ product.product_id }}" class="btn-xs" style="background:rgba(59,130,246,.15);color:var(--primary);border:1px solid rgba(59,130,246,.3);">
+                                <i class="fa-solid fa-eye"></i> View
+                            </a>
+                            <a href="/admin/update-item/{{ product.product_id }}" class="btn-xs btn-edit">
+                                <i class="fa-solid fa-pen"></i> Edit
+                            </a>
+                            <a href="/admin/delete-item/{{ product.product_id }}"
+                               class="btn-xs btn-delete"
+                               onclick="return confirm('Delete this product?')">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+
+    <div class="text-center py-5" style="color:var(--text-muted);">
+        <i class="fa-solid fa-box-open d-block mb-3" style="font-size:3rem;opacity:.4;"></i>
+        <h3 style="color:var(--text);" class="mb-2">No Products Found</h3>
+        <p>{% if request.args.get('search') or request.args.get('category') %}No products match your search.{% else %}Start by adding your first product.{% endif %}</p>
+        <a href="/admin/add-item" class="button mt-3 d-inline-flex">
+            <i class="fa-solid fa-plus"></i> Add Product
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

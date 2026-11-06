@@ -1,0 +1,373 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Update Product #{{ product.product_id }} | Zing-Zing Admin{% endblock %}
+{% block page_title %}Update Product{% endblock %}
+
+{% block content %}
+
+<div class="admin-form-container py-2">
+
+    <!-- ══════════════ HEADER & BREADCRUMB ══════════════ -->
+    <div class="admin-form-header">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <a href="/admin/item-list" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
+                <i class="fa-solid fa-arrow-left"></i> Back to Product List
+            </a>
+            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-1 rounded-pill small">
+                <i class="fa-solid fa-pen-to-square me-1"></i> Edit Mode &bull; Product #{{ product.product_id }}
+            </span>
+        </div>
+        <h1 class="h3 fw-bold mb-1">Update Product Details</h1>
+        <p class="text-muted small mb-0">Modify product specifications, adjust prices, or replace product photos. Leave the image field blank to keep current photo.</p>
+    </div>
+
+    <!-- ══════════════ FORM CONTAINER ══════════════ -->
+    <form method="POST" action="/admin/update-item/{{ product.product_id }}" enctype="multipart/form-data" id="updateProductForm">
+
+        <div class="row g-4">
+
+            <!-- ── LEFT COLUMN: MAIN PRODUCT INFORMATION (8 COLS) ── -->
+            <div class="col-12 col-lg-8">
+
+                <!-- 1. BASIC INFORMATION CARD -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5><i class="fa-solid fa-cube text-primary"></i> Basic Information</h5>
+                        <span class="badge bg-light text-muted border small">Product ID: #{{ product.product_id }}</span>
+                    </div>
+                    <div class="admin-card-body">
+
+                        <!-- PRODUCT NAME -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-semibold small">
+                                Product Title / Name <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted">
+                                    <i class="fa-solid fa-tag"></i>
+                                </span>
+                                <input type="text"
+                                       id="name"
+                                       name="name"
+                                       class="form-control"
+                                       value="{{ product.name }}"
+                                       required
+                                       oninput="updateLivePreview()">
+                            </div>
+                            <div class="form-text small text-muted">
+                                Title visible to customers across search results and category pages.
+                            </div>
+                        </div>
+
+                        <!-- PRODUCT DESCRIPTION -->
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="description" class="form-label fw-semibold small mb-0">
+                                    Product Description <span class="text-danger">*</span>
+                                </label>
+                                <span class="small text-muted" id="descCharCount">{{ product.description|length if product.description else 0 }} characters</span>
+                            </div>
+                            <textarea id="description"
+                                      name="description"
+                                      class="form-control"
+                                      rows="5"
+                                      required
+                                      oninput="handleDescInput(this)">{{ product.description }}</textarea>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 2. CATEGORY & PRICING CARD -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5><i class="fa-solid fa-layer-group text-info"></i> Category &amp; Pricing</h5>
+                    </div>
+                    <div class="admin-card-body">
+
+                        <div class="row g-3">
+
+                            <!-- CATEGORY -->
+                            <div class="col-12 col-md-6">
+                                <label for="category" class="form-label fw-semibold small">
+                                    Category <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted">
+                                        <i class="fa-solid fa-folder-tree"></i>
+                                    </span>
+                                    <input type="text"
+                                           id="category"
+                                           name="category"
+                                           class="form-control"
+                                           value="{{ product.category }}"
+                                           list="popularCategories"
+                                           required
+                                           oninput="updateLivePreview()">
+                                </div>
+                                <datalist id="popularCategories">
+                                    <option value="Electronics">
+                                    <option value="Mobiles">
+                                    <option value="Fashion">
+                                    <option value="Home & Living">
+                                    <option value="Gaming">
+                                    <option value="Appliances">
+                                    <option value="Beauty & Gifts">
+                                    <option value="Toys & Baby">
+                                </datalist>
+
+                                <!-- Quick Fill Chips -->
+                                <div class="quick-category-chips">
+                                    <span class="small text-muted me-1 align-self-center">Popular:</span>
+                                    <button type="button" class="category-chip" onclick="setQuickCategory('Electronics')">Electronics</button>
+                                    <button type="button" class="category-chip" onclick="setQuickCategory('Mobiles')">Mobiles</button>
+                                    <button type="button" class="category-chip" onclick="setQuickCategory('Fashion')">Fashion</button>
+                                    <button type="button" class="category-chip" onclick="setQuickCategory('Home & Living')">Home & Living</button>
+                                    <button type="button" class="category-chip" onclick="setQuickCategory('Gaming')">Gaming</button>
+                                </div>
+                            </div>
+
+                            <!-- PRICE -->
+                            <div class="col-12 col-md-6">
+                                <label for="price" class="form-label fw-semibold small">
+                                    Selling Price (INR) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light fw-bold text-dark">₹</span>
+                                    <input type="number"
+                                           id="price"
+                                           name="price"
+                                           class="form-control"
+                                           value="{{ product.price }}"
+                                           min="0"
+                                           step="0.01"
+                                           required
+                                           oninput="updateLivePreview()">
+                                </div>
+                                <div class="form-text small text-muted">
+                                    Amount customer will pay (inclusive of all taxes).
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── RIGHT COLUMN: MEDIA & LIVE PREVIEW (4 COLS) ── -->
+            <div class="col-12 col-lg-4">
+
+                <!-- 3. PRODUCT IMAGE UPLOAD / REPLACE CARD -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5><i class="fa-solid fa-image text-warning"></i> Product Photo</h5>
+                        <span class="badge bg-light text-muted border small">Optional</span>
+                    </div>
+                    <div class="admin-card-body">
+
+                        <!-- CURRENT IMAGE DISPLAY -->
+                        {% if product.image %}
+                        <div class="mb-3" id="currentImageSection">
+                            <label class="form-label fw-semibold small text-muted mb-1">Current Active Photo:</label>
+                            <div class="upload-preview-card">
+                                {% if product.image.startswith('http://') or product.image.startswith('https://') %}
+                                    <img src="{{ product.image }}" id="currentImgTag" class="upload-preview-img" alt="{{ product.name }}">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='uploads/product_images/' ~ product.image.split('/')[-1]) }}"
+                                         id="currentImgTag"
+                                         class="upload-preview-img"
+                                         alt="{{ product.name }}"
+                                         onerror="this.src='https://placehold.co/300x200/F1F5F9/94A3B8?text=Image+Not+Found';">
+                                {% endif %}
+                                <div class="small text-muted mt-2 text-center">
+                                    <i class="fa-solid fa-circle-check text-success me-1"></i> Current store photo active
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Hidden File Input -->
+                        <input type="file"
+                               id="image"
+                               name="image"
+                               class="d-none"
+                               accept="image/png, image/jpeg, image/jpg, image/webp"
+                               onchange="handleImageSelection(this)">
+
+                        <!-- Dropzone Area to Replace Photo -->
+                        <div class="dropzone-box" id="dropzoneBox" onclick="document.getElementById('image').click()">
+                            <div class="dropzone-icon">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <h6 class="fw-bold mb-1">Upload New Photo</h6>
+                            <p class="text-muted small mb-2">Click or drag &amp; drop to replace</p>
+                            <span class="badge bg-light text-muted border small">
+                                JPG, PNG, WEBP (Max 5MB)
+                            </span>
+                        </div>
+
+                        <!-- Selected Image Preview Box (Hidden until replacement picked) -->
+                        <div class="upload-preview-card mt-3" id="previewContainer" style="display:none;">
+                            <img id="previewImg" class="upload-preview-img" src="" alt="Replacement Preview">
+                            <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top">
+                                <div class="small text-truncate me-2" id="previewFilename" style="max-width:160px;font-weight:600;">
+                                    new_image.jpg
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearSelectedImage()">
+                                    <i class="fa-solid fa-trash me-1"></i> Cancel New
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 4. LIVE CUSTOMER STORE PREVIEW -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5><i class="fa-solid fa-eye text-primary"></i> Customer View Preview</h5>
+                        <span class="badge bg-success-subtle text-success small">Live</span>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="preview-mini-card">
+                            <div class="preview-mini-img-box">
+                                {% if product.image %}
+                                    {% if product.image.startswith('http://') or product.image.startswith('https://') %}
+                                        <img id="liveCardImg" src="{{ product.image }}" alt="Live Preview">
+                                    {% else %}
+                                        <img id="liveCardImg"
+                                             src="{{ url_for('static', filename='uploads/product_images/' ~ product.image.split('/')[-1]) }}"
+                                             alt="Live Preview"
+                                             onerror="this.src='https://placehold.co/300x200/F1F5F9/94A3B8?text=Product+Photo';">
+                                    {% endif %}
+                                {% else %}
+                                    <img id="liveCardImg" src="https://placehold.co/300x200/F1F5F9/94A3B8?text=Product+Photo" alt="Live Preview">
+                                {% endif %}
+                            </div>
+                            <span class="preview-mini-cat" id="liveCardCat">{{ (product.category or 'CATEGORY')|upper }}</span>
+                            <div class="preview-mini-title" id="liveCardTitle">{{ product.name }}</div>
+                            <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top">
+                                <span class="preview-mini-price" id="liveCardPrice">₹{{ "%.2f"|format(product.price or 0) }}</span>
+                                <span class="badge bg-success-subtle text-success small">Free Delivery</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. SAVE ACTIONS CARD -->
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mb-2">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
+                        </button>
+                        <a href="/admin/item-list" class="btn btn-outline-secondary w-100 py-2">
+                            Cancel &amp; Discard
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function handleDescInput(textarea) {
+    const count = textarea.value.length;
+    document.getElementById('descCharCount').textContent = `${count} characters`;
+}
+
+function setQuickCategory(cat) {
+    const catInput = document.getElementById('category');
+    catInput.value = cat;
+    updateLivePreview();
+}
+
+function handleImageSelection(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('liveCardImg').src = e.target.result;
+            document.getElementById('previewFilename').textContent = file.name;
+
+            document.getElementById('dropzoneBox').style.display = 'none';
+            document.getElementById('previewContainer').style.display = 'block';
+            const curSection = document.getElementById('currentImageSection');
+            if (curSection) curSection.style.display = 'none';
+        };
+
+        reader.readAsDataURL(file);
+    }
+}
+
+function clearSelectedImage() {
+    const input = document.getElementById('image');
+    input.value = '';
+    document.getElementById('dropzoneBox').style.display = 'block';
+    document.getElementById('previewContainer').style.display = 'none';
+    const curSection = document.getElementById('currentImageSection');
+    if (curSection) {
+        curSection.style.display = 'block';
+        const curImg = document.getElementById('currentImgTag');
+        if (curImg) {
+            document.getElementById('liveCardImg').src = curImg.src;
+        }
+    }
+}
+
+// Drag and drop handling
+const dropzone = document.getElementById('dropzoneBox');
+if (dropzone) {
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('dragover');
+        }, false);
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+            const fileInput = document.getElementById('image');
+            fileInput.files = files;
+            handleImageSelection(fileInput);
+        }
+    }, false);
+}
+
+function updateLivePreview() {
+    const nameVal = document.getElementById('name').value.trim();
+    const catVal = document.getElementById('category').value.trim();
+    const priceVal = parseFloat(document.getElementById('price').value);
+
+    document.getElementById('liveCardTitle').textContent = nameVal ? nameVal : 'Product Title Appears Here';
+    document.getElementById('liveCardCat').textContent = catVal ? catVal.toUpperCase() : 'CATEGORY';
+    
+    if (!isNaN(priceVal) && priceVal >= 0) {
+        document.getElementById('liveCardPrice').textContent = `₹${priceVal.toFixed(2)}`;
+    } else {
+        document.getElementById('liveCardPrice').textContent = '₹0.00';
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Admin Login | Zing-Zing Store{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-box">
+
+        <div class="auth-top text-center mb-4">
+            <div class="auth-icon-badge text-warning mb-2">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <h3 class="fw-bold mb-1">Admin Login</h3>
+            <p class="text-muted small">Sign in to manage store inventory, orders &amp; products</p>
+        </div>
+
+        <form method="POST" action="/admin-login">
+
+            <div class="mb-3">
+                <label for="email" class="form-label fw-semibold small">Admin Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fa-solid fa-envelope text-muted"></i></span>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="admin@example.com" required autofocus>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label for="password" class="form-label fw-semibold small mb-0">Password</label>
+                    <a href="/admin/forgot" class="small text-primary text-decoration-none">Forgot password?</a>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('password', this)">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-warning w-100 py-2 fw-semibold text-dark mt-2">
+                <i class="fa-solid fa-right-to-bracket me-1"></i> Sign In as Admin
+            </button>
+
+        </form>
+
+        <div class="text-center mt-3">
+            <span class="text-muted small">New Admin?</span>
+            <a href="/admin-signup" class="fw-semibold text-primary small ms-1">Register Admin</a>
+        </div>
+
+        <div class="auth-divider-line my-3">
+            <span>Looking for Customer Portal?</span>
+        </div>
+
+        <a href="/user-login" class="btn btn-outline-primary w-100 py-2 small fw-semibold">
+            <i class="fa-solid fa-user me-1"></i> Go to Customer Login
+        </a>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function togglePasswordVisibility(fieldId, btn) {
+    const input = document.getElementById(fieldId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye';
+    }
+}
+</script>
+{% endblock %}

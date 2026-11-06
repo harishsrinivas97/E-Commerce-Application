@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block title %}Create Customer Account | Zing-Zing Store{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper py-4">
+    <div class="auth-box" style="max-width: 480px;">
+
+        <!-- HEADER -->
+        <div class="auth-top text-center mb-4">
+            <div class="auth-icon-badge text-primary mb-2">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h3 class="fw-bold mb-1">Create Account</h3>
+            <p class="text-muted small">Join Zing-Zing to shop, track orders and get fast delivery</p>
+        </div>
+
+        <form method="POST" action="/user-register" enctype="multipart/form-data">
+
+            <!-- FULL NAME -->
+            <div class="mb-3">
+                <label for="name" class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-body-tertiary text-muted">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter your full name" required autofocus>
+                </div>
+            </div>
+
+            <!-- EMAIL ADDRESS -->
+            <div class="mb-3">
+                <label for="email" class="form-label fw-semibold small">Email Address <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-body-tertiary text-muted">
+                        <i class="fa-solid fa-envelope"></i>
+                    </span>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" required>
+                </div>
+            </div>
+
+            <!-- MOBILE NUMBER -->
+            <div class="mb-3">
+                <label for="phone" class="form-label fw-semibold small">Mobile Number <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-body-tertiary text-muted">
+                        <i class="fa-solid fa-phone"></i>
+                    </span>
+                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="10-digit mobile number" maxlength="10" pattern="[0-9]{10}" required>
+                </div>
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="mb-3">
+                <label for="password" class="form-label fw-semibold small">Password <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-body-tertiary text-muted">
+                        <i class="fa-solid fa-lock"></i>
+                    </span>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Minimum 8 characters" required minlength="8">
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('password', this)" title="Show/Hide Password">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CONFIRM PASSWORD -->
+            <div class="mb-3">
+                <label for="confirm_password" class="form-label fw-semibold small">Confirm Password <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-body-tertiary text-muted">
+                        <i class="fa-solid fa-lock-check"></i>
+                    </span>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Repeat your password" required minlength="8">
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('confirm_password', this)" title="Show/Hide Password">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- OPTIONAL PROFILE PICTURE -->
+            <div class="p-2 mb-3 rounded" style="background-color: var(--elevated); border: 1px solid var(--border);">
+                <div class="d-flex align-items-center gap-3">
+                    <div id="reg-avatar-preview" style="width: 48px; height: 48px; border-radius: 50%; background-color: var(--card); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                        <i class="fa-regular fa-user text-muted"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <label for="profile_image" class="btn btn-outline-secondary btn-sm fw-semibold mb-0 cursor-pointer">
+                            <i class="fa-solid fa-camera me-1"></i> Add Photo (Optional)
+                        </label>
+                        <input type="file" id="profile_image" name="profile_image" class="d-none" accept="image/png,image/jpeg,image/jpg,image/webp" onchange="previewRegAvatar(this)">
+                        <div id="regAvatarFileName" class="text-muted small" style="font-size: .75rem;">PNG, JPG, WEBP (Max 5MB)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mt-2">
+                <i class="fa-solid fa-paper-plane me-1"></i> Send OTP &amp; Register
+            </button>
+
+        </form>
+
+        <div class="text-center mt-3 pt-2 border-top">
+            <span class="text-muted small">Already have an account?</span>
+            <a href="/user-login" class="fw-semibold text-primary small ms-1">Sign In</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function togglePasswordVisibility(fieldId, btn) {
+    const input = document.getElementById(fieldId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye';
+    }
+}
+
+function previewRegAvatar(input) {
+    const preview = document.getElementById('reg-avatar-preview');
+    const label = document.getElementById('regAvatarFileName');
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        label.innerHTML = `<span class="text-primary fw-semibold">${file.name}</span>`;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+</script>
+{% endblock %}

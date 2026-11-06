@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+{% block title %}Shop Products | Zing-Zing Store{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════ DASHBOARD HEADER BAR ═══════════════════ -->
+<div class="catalog-top-bar">
+    <div class="container-fluid">
+        <div class="row align-items-center justify-content-between g-3 py-2">
+            
+            <div class="col-12 col-md-6">
+                <h4 class="fw-bold mb-1">
+                    Welcome, {{ user_name }}! 👋
+                </h4>
+                <p class="text-muted small mb-0">
+                    Showing <span class="fw-semibold text-primary" id="visible-count">{{ products|length }}</span> of {{ products|length }} products
+                </p>
+            </div>
+
+            <div class="col-12 col-md-6 d-flex align-items-center justify-content-md-end gap-2">
+                <div class="catalog-search-wrap">
+                    <i class="fa-solid fa-magnifying-glass catalog-search-icon"></i>
+                    <input type="text" id="liveSearchInput" class="catalog-search-input" placeholder="Search by name or category..." oninput="handleSearchFilter()">
+                </div>
+                <a href="{{ url_for('view_cart') }}" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="d-none d-sm-inline">My Cart</span>
+                    <span class="badge bg-primary text-white rounded-pill" id="cart-count">{{ cart_count|default(0) }}</span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════ CATEGORY FILTER PILLS ═══════════════════ -->
+<div class="container-fluid my-3">
+    <div class="catalog-categories-bar" id="categoryFilterBar">
+        <button type="button" class="filter-pill active" onclick="filterByCategory('all', this)">
+            <i class="fa-solid fa-border-all me-1"></i> All Products
+        </button>
+        {% set unique_cats = [] %}
+        {% for p in products %}
+            {% if p.category and p.category not in unique_cats %}
+                {% set _ = unique_cats.append(p.category) %}
+                <button type="button" class="filter-pill" onclick="filterByCategory('{{ p.category|lower }}', this)">
+                    {{ p.category }}
+                </button>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ═══════════════════ SPACIOUS PRODUCT CARDS GRID (DISPLAY FREELY) ═══════════════════ -->
+<div class="container-fluid mb-5">
+
+    {% if products %}
+    <div class="free-product-grid" id="productGrid">
+
+        {% for product in products %}
+        <article class="free-product-card" data-name="{{ product.name|lower }}" data-category="{{ (product.category or 'general')|lower }}">
+
+            <!-- IMAGE CONTAINER (CLICKABLE TO VIEW COMPLETE PRODUCT DETAILS) -->
+            <div class="free-product-img-box">
+                <a href="/user-product/{{ product.product_id }}" class="free-product-img-link" title="Click to view full details of {{ product.name }}">
+                    {% if product.image %}
+                        {% if product.image.startswith('http://') or product.image.startswith('https://') %}
+                            <img src="{{ product.image }}" alt="{{ product.name }}"
+                                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/product_images/' ~ product.image.split('/')[-1]) }}"
+                                 alt="{{ product.name }}"
+                                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        {% endif %}
+                        <div class="free-no-image" style="display:none;">
+                            <i class="fa-regular fa-image"></i>
+                            <span>No Image</span>
+                        </div>
+                    {% else %}
+                        <div class="free-no-image">
+                            <i class="fa-regular fa-image"></i>
+                            <span>No Image</span>
+                        </div>
+                    {% endif %}
+                </a>
+            </div>
+
+            <!-- PRODUCT BODY -->
+            <div class="free-product-body">
+                
+                <span class="free-product-cat">{{ product.category or 'General' }}</span>
+
+                <h3 class="free-product-title" title="{{ product.name }}">
+                    <a href="/user-product/{{ product.product_id }}" class="free-product-title-link">
+                        {{ product.name }}
+                    </a>
+                </h3>
+
+                <p class="free-product-desc">
+                    {{ product.description or 'High-quality item available for instant dispatch with 100% guarantee.' }}
+                </p>
+
+                <div class="free-product-price-row">
+                    <span class="free-product-price">₹{{ "%.2f"|format(product.price or 0) }}</span>
+                    <span class="free-delivery-badge"><i class="fa-solid fa-truck-fast me-1"></i> Free Delivery</span>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="free-product-actions">
+                    <button type="button" class="btn btn-outline-primary free-btn-cart"
+                            data-product-id="{{ product.product_id }}"
+                            onclick="addToCart(this, false)">
+                        <i class="fa-solid fa-cart-plus me-1"></i> Add to Cart
+                    </button>
+                    <button type="button" class="btn btn-primary free-btn-buy"
+                            data-product-id="{{ product.product_id }}"
+                            onclick="addToCart(this, true)">
+                        <i class="fa-solid fa-bolt me-1"></i> Buy Now
+                    </button>
+                </div>
+
+            </div>
+
+        </article>
+        {% endfor %}
+
+    </div>
+
+    <!-- EMPTY / NO MATCHES STATE -->
+    <div id="noProductsFound" class="empty-state-box" style="display:none;">
+        <div class="empty-icon text-muted mb-2">
+            <i class="fa-solid fa-magnifying-glass fs-1"></i>
+        </div>
+        <h5 class="fw-bold">No Products Found</h5>
+        <p class="text-muted small">No products match your current search or category filter.</p>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="resetAllFilters()">
+            Clear Filters
+        </button>
+    </div>
+
+    {% else %}
+    <div class="empty-state-box">
+        <div class="empty-icon text-muted mb-2">
+            <i class="fa-solid fa-box-open fs-1"></i>
+        </div>
+        <h5 class="fw-bold">No Products in Store</h5>
+        <p class="text-muted small">Products will appear here once added by the store administrator.</p>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+let activeCategory = 'all';
+
+// Handle initial URL search parameter if present
+document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchVal = urlParams.get('search');
+    if (searchVal) {
+        const input = document.getElementById('liveSearchInput');
+        if (input) {
+            input.value = searchVal;
+            handleSearchFilter();
+        }
+    }
+});
+
+function filterByCategory(cat, btn) {
+    activeCategory = cat.toLowerCase();
+    document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    handleSearchFilter();
+}
+
+function handleSearchFilter() {
+    const query = (document.getElementById('liveSearchInput')?.value || '').toLowerCase().trim();
+    const cards = document.querySelectorAll('.free-product-card');
+    let count = 0;
+
+    cards.forEach(card => {
+        const name = card.dataset.name || '';
+        const cat = card.dataset.category || '';
+
+        const catMatches = (activeCategory === 'all' || cat === activeCategory);
+        const textMatches = (!query || name.includes(query) || cat.includes(query));
+
+        if (catMatches && textMatches) {
+            card.style.display = 'flex';
+            count++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    const visibleCountEl = document.getElementById('visible-count');
+    if (visibleCountEl) visibleCountEl.textContent = count;
+
+    const noFound = document.getElementById('noProductsFound');
+    if (noFound) noFound.style.display = count === 0 ? 'block' : 'none';
+}
+
+function resetAllFilters() {
+    const input = document.getElementById('liveSearchInput');
+    if (input) input.value = '';
+    const allPill = document.querySelector('.filter-pill');
+    if (allPill) filterByCategory('all', allPill);
+}
+
+// ── ADD TO CART & BUY NOW ───────────────────────────────────
+async function addToCart(button, buyNow = false) {
+    const productId = button.dataset.productId;
+    const originalContent = button.innerHTML;
+
+    try {
+        button.disabled = true;
+        button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+        const response = await fetch(`/user/add-to-cart-ajax/${productId}`, { method: 'POST' });
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            alert(data.message || 'Unable to add product!');
+            if (response.status === 401) window.location.href = '/user-login';
+            return;
+        }
+
+        // Update all cart count badges
+        document.querySelectorAll('#cart-count').forEach(el => {
+            el.innerText = data.cart_count;
+        });
+
+        if (buyNow) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/user/checkout-selected';
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'selected_ids';
+            input.value = productId;
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+            return;
+        }
+
+        button.innerHTML = '<i class="fa-solid fa-check"></i> Added';
+        button.classList.remove('btn-outline-primary');
+        button.classList.add('btn-success');
+        setTimeout(() => {
+            button.innerHTML = originalContent;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-primary');
+            button.disabled = false;
+        }, 1200);
+
+    } catch (error) {
+        console.error('Cart Error:', error);
+        alert('Something went wrong. Please try again.');
+        button.innerHTML = originalContent;
+        button.disabled = false;
+    }
+}
+</script>
+{% endblock %}

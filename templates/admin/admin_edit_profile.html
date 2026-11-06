@@ -1,0 +1,188 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Edit Admin Profile | Zing-Zing{% endblock %}
+{% block page_title %}Edit Profile{% endblock %}
+
+{% block content %}
+
+<div class="admin-form-container py-2" style="max-width: 680px; margin: 0 auto;">
+
+    <!-- ══════════════ BREADCRUMB & HEADER ══════════════ -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <a href="/admin/profile" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
+            <i class="fa-solid fa-arrow-left"></i> Back to Profile
+        </a>
+        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-1 rounded-pill small">
+            <i class="fa-solid fa-pen-to-square me-1"></i> Edit Account Details
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <h1 class="h3 fw-bold mb-1">Edit Administrator Profile</h1>
+        <p class="text-muted small mb-0">Update your personal account credentials, change password, or upload a new profile picture.</p>
+    </div>
+
+    <!-- ══════════════ FORM CONTAINER ══════════════ -->
+    <form method="POST" action="/admin/profile" enctype="multipart/form-data" id="editAdminProfileForm">
+
+        <div class="admin-card mb-4">
+            <div class="admin-card-body p-4">
+
+                <!-- 1. PROFILE PHOTO SECTION (Matches Customer Clean Style) -->
+                <div class="p-3 rounded mb-4" style="background-color: var(--elevated); border: 1px solid var(--border);">
+                    <label class="form-label fw-bold small text-muted text-uppercase tracking-wide mb-2 d-block">
+                        Profile Photo
+                    </label>
+
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <!-- Circular Avatar Preview -->
+                        <div class="position-relative" style="width: 80px; height: 80px; flex-shrink: 0;">
+                            <div id="adminAvatarWrap" style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; border: 3px solid var(--border); background-color: var(--card); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: center;">
+                                {% if admin.profile_image %}
+                                    <img id="avatarPreviewImg"
+                                         src="{{ url_for('static', filename='uploads/admin_profiles/' ~ admin.profile_image) }}"
+                                         alt="{{ admin.name }}"
+                                         style="width: 100%; height: 100%; object-fit: cover;"
+                                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    <span class="fw-bold fs-3 text-primary" style="display:none;">
+                                        {{ admin.name[0].upper() if admin.name else 'A' }}
+                                    </span>
+                                {% else %}
+                                    <span class="fw-bold fs-3 text-primary">
+                                        {{ admin.name[0].upper() if admin.name else 'A' }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Photo Upload Controls -->
+                        <div class="flex-grow-1">
+                            <label for="profile_image" class="btn btn-outline-primary btn-sm fw-semibold mb-1 cursor-pointer">
+                                <i class="fa-solid fa-camera me-1"></i> Choose New Photo
+                            </label>
+                            <input type="file"
+                                   id="profile_image"
+                                   name="profile_image"
+                                   class="d-none"
+                                   accept="image/png,image/jpeg,image/jpg,image/webp"
+                                   onchange="handleAvatarChange(this)">
+                            <div id="selectedFileName" class="text-muted small mt-1">
+                                PNG, JPG, JPEG or WEBP (Max 5MB)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. FULL NAME -->
+                <div class="mb-3">
+                    <label for="name" class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light text-muted">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text"
+                               id="name"
+                               name="name"
+                               class="form-control"
+                               value="{{ admin.name }}"
+                               required
+                               placeholder="Your full name">
+                    </div>
+                </div>
+
+                <!-- 3. EMAIL ADDRESS -->
+                <div class="mb-3">
+                    <label for="email" class="form-label fw-semibold small">Email Address <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light text-muted">
+                            <i class="fa-solid fa-envelope"></i>
+                        </span>
+                        <input type="email"
+                               id="email"
+                               name="email"
+                               class="form-control"
+                               value="{{ admin.email }}"
+                               required
+                               placeholder="you@domain.com">
+                    </div>
+                    <div class="form-text small text-muted">Used for admin portal login and store notifications.</div>
+                </div>
+
+                <!-- 4. NEW PASSWORD (OPTIONAL) -->
+                <div class="mb-4">
+                    <label for="password" class="form-label fw-semibold small">
+                        New Password <span class="text-muted fw-normal">(leave blank to keep current)</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light text-muted">
+                            <i class="fa-solid fa-key"></i>
+                        </span>
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               class="form-control"
+                               placeholder="Enter new password (min. 8 characters)">
+                        <button class="btn btn-outline-secondary"
+                                type="button"
+                                onclick="togglePasswordVisibility('password', this)"
+                                title="Toggle Password Visibility">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-text small text-muted">
+                        Leave empty if you don't want to change your password.
+                    </div>
+                </div>
+
+                <!-- 5. ACTION BUTTONS -->
+                <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top" style="border-color: var(--border) !important;">
+                    <a href="/admin/profile" class="btn btn-outline-secondary px-4 fw-semibold">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                        <i class="fa-solid fa-check me-1"></i> Save Profile Changes
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Live avatar preview upon file selection
+function handleAvatarChange(input) {
+    const fileLabel = document.getElementById('selectedFileName');
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        fileLabel.innerHTML = `<span class="text-primary fw-semibold"><i class="fa-solid fa-file-image me-1"></i> Selected: ${file.name}</span>`;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const wrap = document.getElementById('adminAvatarWrap');
+            wrap.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width:100%;height:100%;object-fit:cover;">`;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Toggle Password Visibility
+function togglePasswordVisibility(fieldId, btn) {
+    const input = document.getElementById(fieldId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>
+{% endblock %}

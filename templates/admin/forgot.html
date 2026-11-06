@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Reset Admin Password | Zing-Zing Store{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper py-4">
+    <div class="auth-box">
+
+        <!-- HEADER -->
+        <div class="auth-top text-center mb-4">
+            <div class="auth-icon-badge text-warning mb-2" style="background-color: rgba(245, 158, 11, 0.1);">
+                <i class="fa-solid fa-key"></i>
+            </div>
+            <h3 class="fw-bold mb-1">Reset Admin Password</h3>
+            <p class="text-muted small">Enter your admin email to receive a 6-digit OTP verification code.</p>
+        </div>
+
+        <form method="POST" action="/admin/forgot">
+
+            <div class="mb-3">
+                <label for="email" class="form-label fw-semibold small">Admin Email Address <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-body-tertiary text-muted">
+                        <i class="fa-solid fa-envelope"></i>
+                    </span>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="admin@example.com" required autofocus>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-warning w-100 py-2 fw-semibold text-dark mt-2">
+                <i class="fa-solid fa-paper-plane me-1"></i> Send OTP Code
+            </button>
+
+        </form>
+
+        <div class="text-center mt-3 pt-2 border-top">
+            <a href="/admin-login" class="text-muted text-decoration-none small">
+                <i class="fa-solid fa-arrow-left me-1"></i> Back to Admin Login
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

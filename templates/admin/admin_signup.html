@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Admin Signup | Zing-Zing Store{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper py-4">
+    <div class="auth-box">
+
+        <!-- HEADER -->
+        <div class="auth-top text-center mb-4">
+            <div class="auth-icon-badge text-warning mb-2" style="background-color: rgba(245, 158, 11, 0.1);">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <h3 class="fw-bold mb-1">Create Admin Account</h3>
+            <p class="text-muted small">Register as a store administrator to manage inventory and products.</p>
+        </div>
+
+        <form method="POST" action="/admin-signup">
+
+            <!-- FULL NAME -->
+            <div class="mb-3">
+                <label for="name" class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-body-tertiary text-muted">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter your full name" required autofocus>
+                </div>
+            </div>
+
+            <!-- EMAIL ADDRESS -->
+            <div class="mb-3">
+                <label for="email" class="form-label fw-semibold small">Email Address <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-body-tertiary text-muted">
+                        <i class="fa-solid fa-envelope"></i>
+                    </span>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="admin@example.com" required>
+                </div>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button type="submit" class="btn btn-warning w-100 py-2 fw-semibold text-dark mt-2">
+                <i class="fa-solid fa-paper-plane me-1"></i> Send OTP to Email
+            </button>
+
+        </form>
+
+        <div class="text-center mt-3 pt-2 border-top">
+            <span class="text-muted small">Already have an admin account?</span>
+            <a href="/admin-login" class="fw-semibold text-primary small ms-1">Sign In</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

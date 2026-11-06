@@ -1,0 +1,334 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} | Zing-Zing Online Store{% endblock %}
+
+{% block content %}
+<div class="product-view-container container-fluid py-3 py-md-4">
+
+    <!-- ═══════════════════ BREADCRUMB NAVIGATION ═══════════════════ -->
+    <nav class="product-breadcrumb mb-3" aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="/user-dashboard" class="text-decoration-none">
+                    <i class="fa-solid fa-house me-1"></i> Shop
+                </a>
+            </li>
+            {% if product.category %}
+            <li class="breadcrumb-item">
+                <a href="/user-dashboard?category={{ product.category }}" class="text-decoration-none">
+                    {{ product.category }}
+                </a>
+            </li>
+            {% endif %}
+            <li class="breadcrumb-item active text-truncate" style="max-width:320px;" aria-current="page">
+                {{ product.name }}
+            </li>
+        </ol>
+    </nav>
+
+    <!-- ═══════════════════ MAIN PRODUCT DISPLAY ═══════════════════ -->
+    <div class="product-main-card card border p-3 p-md-4 mb-4">
+        <div class="row g-4 align-items-start">
+
+            <!-- LEFT: PRODUCT IMAGE & TRUST BADGES -->
+            <div class="col-12 col-lg-5">
+                <div class="product-gallery-box">
+                    <div class="product-img-display">
+                        {% if product.image %}
+                            {% if product.image.startswith('http://') or product.image.startswith('https://') %}
+                                <img src="{{ product.image }}"
+                                     alt="{{ product.name }}"
+                                     id="mainProductImg"
+                                     class="img-fluid"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='uploads/product_images/' ~ product.image.split('/')[-1]) }}"
+                                     alt="{{ product.name }}"
+                                     id="mainProductImg"
+                                     class="img-fluid"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                            {% endif %}
+                            <div class="product-img-fallback" style="display:none;">
+                                <i class="fa-regular fa-image fs-1 text-muted"></i>
+                                <span class="text-muted mt-2 small">Image not available</span>
+                            </div>
+                        {% else %}
+                            <div class="product-img-fallback">
+                                <i class="fa-regular fa-image fs-1 text-muted"></i>
+                                <span class="text-muted mt-2 small">No image provided</span>
+                            </div>
+                        {% endif %}
+
+                        <!-- Floating Badges -->
+                        <span class="product-floating-badge badge bg-primary">
+                            <i class="fa-solid fa-shield-halved me-1"></i> Zing-Zing Assured
+                        </span>
+                    </div>
+
+                    <!-- Trust Bar Under Image -->
+                    <div class="product-trust-strip mt-3">
+                        <div class="trust-pill">
+                            <i class="fa-solid fa-circle-check text-success"></i>
+                            <span>100% Genuine</span>
+                        </div>
+                        <div class="trust-pill">
+                            <i class="fa-solid fa-rotate-left text-primary"></i>
+                            <span>7-Day Return</span>
+                        </div>
+                        <div class="trust-pill">
+                            <i class="fa-solid fa-truck-fast text-warning"></i>
+                            <span>Free Delivery</span>
+                        </div>
+                        <div class="trust-pill">
+                            <i class="fa-solid fa-file-invoice text-info"></i>
+                            <span>GST Invoice</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: COMPREHENSIVE PRODUCT INFORMATION -->
+            <div class="col-12 col-lg-7">
+                <div class="product-info-panel">
+
+                    <!-- Category & Status Row -->
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                        <a href="/user-dashboard?category={{ product.category or 'General' }}"
+                           class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 text-decoration-none fw-semibold">
+                            <i class="fa-solid fa-tag me-1"></i> {{ product.category or 'General' }}
+                        </a>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fw-semibold">
+                            <i class="fa-solid fa-circle-check me-1"></i> In Stock &bull; Ready to Ship
+                        </span>
+                    </div>
+
+                    <!-- Product Title -->
+                    <h1 class="product-display-title mb-2">
+                        {{ product.name }}
+                    </h1>
+
+                    <!-- Rating & Reviews Bar -->
+                    <div class="product-rating-row d-flex align-items-center gap-2 mb-3">
+                        <div class="stars text-warning small">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star-half-stroke"></i>
+                        </div>
+                        <span class="fw-bold small">4.6</span>
+                        <span class="text-muted small">&bull;</span>
+                        <span class="text-muted small">148 Customer Ratings</span>
+                        <span class="text-muted small">&bull;</span>
+                        <span class="text-success small fw-semibold"><i class="fa-solid fa-award me-1"></i> Top Seller</span>
+                    </div>
+
+                    <!-- Price Box -->
+                    <div class="product-price-container p-3 rounded mb-3">
+                        <div class="d-flex align-items-baseline gap-3 flex-wrap">
+                            <span class="product-current-price">₹{{ "%.2f"|format(product.price|float or 0) }}</span>
+                            <span class="product-mrp-price text-muted text-decoration-line-through">
+                                ₹{{ "%.2f"|format(((product.price|float or 0) * 1.25)) }}
+                            </span>
+                            <span class="badge bg-danger-subtle text-danger fw-bold px-2 py-1">
+                                20% OFF
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mt-1 text-muted small">
+                            <i class="fa-solid fa-circle-info text-primary"></i>
+                            <span>Inclusive of all taxes &bull; <strong>Free Delivery</strong> on this item</span>
+                        </div>
+                    </div>
+
+                    <!-- Product Description -->
+                    <div class="product-desc-box mb-4">
+                        <h6 class="fw-bold text-uppercase small text-muted mb-2 tracking-wide">
+                            <i class="fa-solid fa-align-left me-1"></i> Product Overview &amp; Description
+                        </h6>
+                        <div class="product-desc-text p-3 rounded">
+                            {{ product.description or 'High-quality item crafted with top-grade materials, available for instant dispatch with 100% genuine purchase protection and official warranty.' }}
+                        </div>
+                    </div>
+
+                    <!-- Specifications Table -->
+                    <div class="product-specs-card mb-4">
+                        <h6 class="fw-bold text-uppercase small text-muted mb-2 tracking-wide">
+                            <i class="fa-solid fa-list-check me-1"></i> Item Specifications
+                        </h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm mb-0 product-specs-table">
+                                <tbody>
+                                    <tr>
+                                        <th class="spec-label">Product ID</th>
+                                        <td class="spec-val">#PROD-{{ "%05d"|format(product.product_id) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="spec-label">Category</th>
+                                        <td class="spec-val">{{ product.category or 'General' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="spec-label">Sold &amp; Dispatched By</th>
+                                        <td class="spec-val">
+                                            <strong>{{ product.seller_name or 'Zing-Zing Official Seller' }}</strong>
+                                            <span class="badge bg-primary-subtle text-primary ms-1 small">Verified</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="spec-label">Shipping</th>
+                                        <td class="spec-val text-success">
+                                            <i class="fa-solid fa-truck-fast me-1"></i> Free Standard Express Delivery (2–4 days)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="spec-label">Return &amp; Warranty</th>
+                                        <td class="spec-val">7 Days Hassle-Free Replacement Policy</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="spec-label">Payment Modes</th>
+                                        <td class="spec-val">UPI, Credit/Debit Cards, Net Banking &amp; Razorpay</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- QUANTITY SELECTOR & PURCHASE BUTTONS -->
+                    <div class="product-purchase-box p-3 rounded mb-3">
+                        <div class="row g-3 align-items-center">
+
+                            <!-- Quantity Stepper -->
+                            <div class="col-12 col-sm-auto">
+                                <label class="form-label small fw-bold text-muted mb-1 d-block">Quantity</label>
+                                <div class="qty-stepper d-inline-flex align-items-center border rounded">
+                                    <button type="button" class="btn btn-sm btn-link text-decoration-none px-3 py-2" style="color:var(--text);" onclick="changeQty(-1)" title="Decrease">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                    <input type="number" id="qtyInput" class="form-control text-center border-0 fw-bold px-0" value="1" min="1" max="99" readonly style="width: 50px;">
+                                    <button type="button" class="btn btn-sm btn-link text-decoration-none px-3 py-2" style="color:var(--text);" onclick="changeQty(1)" title="Increase">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="col-12 col-sm">
+                                <label class="form-label small fw-bold text-muted mb-1 d-none d-sm-block">&nbsp;</label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button"
+                                            class="btn btn-outline-primary btn-lg flex-grow-1 fw-bold"
+                                            id="btnAddToCart"
+                                            data-product-id="{{ product.product_id }}"
+                                            onclick="addToCartDetail(this, false)">
+                                        <i class="fa-solid fa-cart-plus me-2"></i> Add to Cart
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-primary btn-lg flex-grow-1 fw-bold"
+                                            id="btnBuyNow"
+                                            data-product-id="{{ product.product_id }}"
+                                            onclick="addToCartDetail(this, true)">
+                                        <i class="fa-solid fa-bolt me-2"></i> Buy Now
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Back / Continue Shopping -->
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-2">
+                        <a href="/user-dashboard" class="btn btn-sm btn-outline-secondary">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Back to Products
+                        </a>
+                        <span class="text-muted small">
+                            <i class="fa-solid fa-lock text-success me-1"></i> 256-bit SSL Encrypted Checkout
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let qty = 1;
+
+function changeQty(delta) {
+    const input = document.getElementById('qtyInput');
+    qty = Math.max(1, Math.min(99, qty + delta));
+    if (input) input.value = qty;
+}
+
+async function addToCartDetail(button, buyNow) {
+    const productId = button.dataset.productId;
+    const originalHTML = button.innerHTML;
+
+    button.disabled = true;
+    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Please wait...';
+
+    try {
+        const response = await fetch(`/user/add-to-cart-ajax/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ quantity: qty })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            alert(data.message || 'Unable to add product!');
+            if (response.status === 401) {
+                window.location.href = '/user-login';
+            }
+            button.disabled = false;
+            button.innerHTML = originalHTML;
+            return;
+        }
+
+        // Update all cart count badges in navbar
+        document.querySelectorAll('#cart-count').forEach(el => {
+            el.innerText = data.cart_count;
+        });
+
+        if (buyNow) {
+            // Direct form post to checkout
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/user/checkout-selected';
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'selected_ids';
+            input.value = productId;
+            form.appendChild(input);
+
+            document.body.appendChild(form);
+            form.submit();
+        } else {
+            // Success animation
+            button.classList.remove('btn-outline-primary');
+            button.classList.add('btn-success');
+            button.innerHTML = '<i class="fa-solid fa-check me-1"></i> Added to Cart!';
+
+            setTimeout(() => {
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-primary');
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            }, 1800);
+        }
+    } catch (err) {
+        console.error('Error adding product:', err);
+        alert('Network error. Please try again.');
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+    }
+}
+</script>
+{% endblock %}

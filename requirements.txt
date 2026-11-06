@@ -1,0 +1,9 @@
+flask
+flask-mail
+bcrypt
+razorpay
+werkzeug
+reportlab
+pillow
+python-dotenv
+# mysql-connector-python  # Optional (only needed if re-running migration from MySQL)

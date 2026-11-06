@@ -1,0 +1,348 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Add New Product | Zing-Zing Admin{% endblock %}
+{% block page_title %}Add Product{% endblock %}
+
+{% block content %}
+
+<div class="admin-form-container py-2">
+
+    <!-- ══════════════ HEADER & BREADCRUMB ══════════════ -->
+    <div class="admin-form-header">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <a href="/admin/item-list" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
+                <i class="fa-solid fa-arrow-left"></i> Back to Product List
+            </a>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill small">
+                <i class="fa-solid fa-sparkles me-1"></i> New Inventory Item
+            </span>
+        </div>
+        <h1 class="h3 fw-bold mb-1">Add New Product</h1>
+        <p class="text-muted small mb-0">Fill in the specifications, set selling price, and upload product photos to publish to the store.</p>
+    </div>
+
+    <!-- ══════════════ FORM CONTAINER ══════════════ -->
+    <form method="POST" action="/admin/add-item" enctype="multipart/form-data" id="addProductForm">
+
+        <div class="row g-4">
+
+            <!-- ── LEFT COLUMN: MAIN PRODUCT INFORMATION (8 COLS) ── -->
+            <div class="col-12 col-lg-8">
+
+                <!-- 1. BASIC INFORMATION CARD -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5><i class="fa-solid fa-cube text-primary"></i> Basic Information</h5>
+                        <span class="badge bg-light text-muted border small">Required Fields *</span>
+                    </div>
+                    <div class="admin-card-body">
+
+                        <!-- PRODUCT NAME -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-semibold small">
+                                Product Title / Name <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted">
+                                    <i class="fa-solid fa-tag"></i>
+                                </span>
+                                <input type="text"
+                                       id="name"
+                                       name="name"
+                                       class="form-control"
+                                       placeholder="e.g. Wireless Noise-Cancelling Over-Ear Headphones"
+                                       required
+                                       autofocus
+                                       oninput="updateLivePreview()">
+                            </div>
+                            <div class="form-text small text-muted">
+                                A descriptive name helps customers find your product in search results.
+                            </div>
+                        </div>
+
+                        <!-- PRODUCT DESCRIPTION -->
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="description" class="form-label fw-semibold small mb-0">
+                                    Product Description <span class="text-danger">*</span>
+                                </label>
+                                <span class="small text-muted" id="descCharCount">0 characters</span>
+                            </div>
+                            <textarea id="description"
+                                      name="description"
+                                      class="form-control"
+                                      rows="5"
+                                      placeholder="Provide detailed information including features, key specifications, materials, warranty, and package contents..."
+                                      required
+                                      oninput="handleDescInput(this)"></textarea>
+                            <div class="form-text small text-muted">
+                                Include essential highlights that convince customers to buy.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 2. CATEGORY & PRICING CARD -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5><i class="fa-solid fa-layer-group text-info"></i> Category &amp; Pricing</h5>
+                    </div>
+                    <div class="admin-card-body">
+
+                        <div class="row g-3">
+
+                            <!-- CATEGORY -->
+                            <div class="col-12 col-md-6">
+                                <label for="category" class="form-label fw-semibold small">
+                                    Category <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted">
+                                        <i class="fa-solid fa-folder-tree"></i>
+                                    </span>
+                                    <input type="text"
+                                           id="category"
+                                           name="category"
+                                           class="form-control"
+                                           placeholder="e.g. Electronics, Fashion"
+                                           list="popularCategories"
+                                           required
+                                           oninput="updateLivePreview()">
+                                </div>
+                                <datalist id="popularCategories">
+                                    <option value="Electronics">
+                                    <option value="Mobiles">
+                                    <option value="Fashion">
+                                    <option value="Home & Living">
+                                    <option value="Gaming">
+                                    <option value="Appliances">
+                                    <option value="Beauty & Gifts">
+                                    <option value="Toys & Baby">
+                                </datalist>
+
+                                <!-- Quick Fill Chips -->
+                                <div class="quick-category-chips">
+                                    <span class="small text-muted me-1 align-self-center">Popular:</span>
+                                    <button type="button" class="category-chip" onclick="setQuickCategory('Electronics')">Electronics</button>
+                                    <button type="button" class="category-chip" onclick="setQuickCategory('Mobiles')">Mobiles</button>
+                                    <button type="button" class="category-chip" onclick="setQuickCategory('Fashion')">Fashion</button>
+                                    <button type="button" class="category-chip" onclick="setQuickCategory('Home & Living')">Home & Living</button>
+                                    <button type="button" class="category-chip" onclick="setQuickCategory('Gaming')">Gaming</button>
+                                </div>
+                            </div>
+
+                            <!-- PRICE -->
+                            <div class="col-12 col-md-6">
+                                <label for="price" class="form-label fw-semibold small">
+                                    Selling Price (INR) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light fw-bold text-dark">₹</span>
+                                    <input type="number"
+                                           id="price"
+                                           name="price"
+                                           class="form-control"
+                                           placeholder="0.00"
+                                           min="0"
+                                           step="0.01"
+                                           required
+                                           oninput="updateLivePreview()">
+                                </div>
+                                <div class="form-text small text-muted">
+                                    Amount customer will pay (inclusive of GST).
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── RIGHT COLUMN: MEDIA & LIVE PREVIEW (4 COLS) ── -->
+            <div class="col-12 col-lg-4">
+
+                <!-- 3. PRODUCT IMAGE UPLOAD CARD -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5><i class="fa-solid fa-image text-warning"></i> Product Photo <span class="text-danger">*</span></h5>
+                    </div>
+                    <div class="admin-card-body">
+
+                        <!-- Hidden File Input -->
+                        <input type="file"
+                               id="image"
+                               name="image"
+                               class="d-none"
+                               accept="image/png, image/jpeg, image/jpg, image/webp"
+                               required
+                               onchange="handleImageSelection(this)">
+
+                        <!-- Dropzone Area -->
+                        <div class="dropzone-box" id="dropzoneBox" onclick="document.getElementById('image').click()">
+                            <div class="dropzone-icon">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <h6 class="fw-bold mb-1">Click to Upload Photo</h6>
+                            <p class="text-muted small mb-2">or drag and drop image here</p>
+                            <span class="badge bg-light text-muted border small">
+                                JPG, PNG, WEBP (Max 5MB)
+                            </span>
+                        </div>
+
+                        <!-- Selected Image Preview Box (Hidden by default) -->
+                        <div class="upload-preview-card mt-3" id="previewContainer" style="display:none;">
+                            <img id="previewImg" class="upload-preview-img" src="" alt="Selected Preview">
+                            <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top">
+                                <div class="small text-truncate me-2" id="previewFilename" style="max-width:160px;font-weight:600;">
+                                    filename.jpg
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearSelectedImage()">
+                                    <i class="fa-solid fa-trash me-1"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 4. LIVE CUSTOMER STORE PREVIEW -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5><i class="fa-solid fa-eye text-primary"></i> Customer View Preview</h5>
+                        <span class="badge bg-success-subtle text-success small">Live</span>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="preview-mini-card">
+                            <div class="preview-mini-img-box">
+                                <img id="liveCardImg" src="https://placehold.co/300x200/F1F5F9/94A3B8?text=Product+Photo" alt="Live Preview">
+                            </div>
+                            <span class="preview-mini-cat" id="liveCardCat">CATEGORY</span>
+                            <div class="preview-mini-title" id="liveCardTitle">Product Title Appears Here</div>
+                            <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top">
+                                <span class="preview-mini-price" id="liveCardPrice">₹0.00</span>
+                                <span class="badge bg-success-subtle text-success small">Free Delivery</span>
+                            </div>
+                        </div>
+                        <p class="text-muted small text-center mt-2 mb-0">
+                            This reflects how items display on the user dashboard.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 5. PUBLISH ACTIONS CARD -->
+                <div class="admin-card">
+                    <div class="admin-card-body">
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mb-2">
+                            <i class="fa-solid fa-circle-plus me-1"></i> Add Product to Inventory
+                        </button>
+                        <a href="/admin/item-list" class="btn btn-outline-secondary w-100 py-2">
+                            Cancel &amp; Discard
+                        </a>
+                        <div class="text-center mt-3 text-muted small">
+                            <i class="fa-solid fa-shield-halved text-success me-1"></i> Saved instantly to MySQL catalog
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Description character count
+function handleDescInput(textarea) {
+    const count = textarea.value.length;
+    document.getElementById('descCharCount').textContent = `${count} characters`;
+}
+
+// Quick Category selection
+function setQuickCategory(cat) {
+    const catInput = document.getElementById('category');
+    catInput.value = cat;
+    updateLivePreview();
+}
+
+// Image handling
+function handleImageSelection(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('liveCardImg').src = e.target.result;
+            document.getElementById('previewFilename').textContent = file.name;
+
+            document.getElementById('dropzoneBox').style.display = 'none';
+            document.getElementById('previewContainer').style.display = 'block';
+        };
+
+        reader.readAsDataURL(file);
+    }
+}
+
+// Clear selected image
+function clearSelectedImage() {
+    const input = document.getElementById('image');
+    input.value = '';
+    document.getElementById('dropzoneBox').style.display = 'block';
+    document.getElementById('previewContainer').style.display = 'none';
+    document.getElementById('liveCardImg').src = 'https://placehold.co/300x200/F1F5F9/94A3B8?text=Product+Photo';
+}
+
+// Drag and drop handling
+const dropzone = document.getElementById('dropzoneBox');
+if (dropzone) {
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('dragover');
+        }, false);
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+            const fileInput = document.getElementById('image');
+            fileInput.files = files;
+            handleImageSelection(fileInput);
+        }
+    }, false);
+}
+
+// Real-time live card update
+function updateLivePreview() {
+    const nameVal = document.getElementById('name').value.trim();
+    const catVal = document.getElementById('category').value.trim();
+    const priceVal = parseFloat(document.getElementById('price').value);
+
+    document.getElementById('liveCardTitle').textContent = nameVal ? nameVal : 'Product Title Appears Here';
+    document.getElementById('liveCardCat').textContent = catVal ? catVal.toUpperCase() : 'CATEGORY';
+    
+    if (!isNaN(priceVal) && priceVal >= 0) {
+        document.getElementById('liveCardPrice').textContent = `₹${priceVal.toFixed(2)}`;
+    } else {
+        document.getElementById('liveCardPrice').textContent = '₹0.00';
+    }
+}
+</script>
+{% endblock %}

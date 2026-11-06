@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin | Zing-Zing{% endblock %}</title>
+    <meta name="theme-color" content="#131921">
+
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('zing_theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+
+<div class="admin-shell">
+
+    <!-- ══════════════ SIDEBAR ══════════════ -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+
+        <div class="sidebar-brand d-flex align-items-center justify-content-between">
+            <div>
+                <a class="brand" href="/admin-dashboard" style="color:#fff;">
+                    <span class="brand-mark">Z</span>
+                    <span>Zing<span class="brand-accent">-Zing</span></span>
+                </a>
+                <p style="font-size:.72rem;color:var(--text-muted);margin-top:.35rem;font-weight:600;letter-spacing:.06em;margin-bottom:0;">ADMIN PORTAL</p>
+            </div>
+            <button type="button" class="btn btn-sm text-secondary d-lg-none" onclick="toggleSidebar()" aria-label="Close sidebar" style="font-size:1.15rem;padding:0.2rem 0.5rem;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="/admin-dashboard"
+               {% if request.path == '/admin-dashboard' %}class="active"{% endif %}>
+                <i class="fa-solid fa-gauge-high"></i>
+                Dashboard
+            </a>
+
+            <div class="sidebar-divider"></div>
+
+            <p style="font-size:.68rem;font-weight:700;letter-spacing:.1em;color:var(--text-muted);padding:.2rem .5rem;text-transform:uppercase;">Products</p>
+
+            <a href="/admin/add-item"
+               {% if request.path == '/admin/add-item' %}class="active"{% endif %}>
+                <i class="fa-solid fa-circle-plus"></i>
+                Add Product
+            </a>
+
+            <a href="/admin/item-list"
+               {% if '/admin/item' in request.path and request.path != '/admin/add-item' %}class="active"{% endif %}>
+                <i class="fa-solid fa-box-open"></i>
+                Product List
+            </a>
+
+            <div class="sidebar-divider"></div>
+
+            <p style="font-size:.68rem;font-weight:700;letter-spacing:.1em;color:var(--text-muted);padding:.2rem .5rem;text-transform:uppercase;">Account</p>
+
+            <a href="/admin/profile"
+               {% if '/admin/profile' in request.path or '/admin/edit-profile' in request.path %}class="active"{% endif %}>
+                <i class="fa-solid fa-user-shield"></i>
+                Admin Profile
+            </a>
+
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/admin-logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Logout
+            </a>
+        </div>
+
+    </aside>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+    <!-- ══════════════ MAIN CONTENT ══════════════ -->
+    <div class="admin-content">
+
+        <!-- TOPBAR -->
+        <header class="admin-topbar">
+
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn"
+                        style="padding:.35rem .65rem;background:transparent;border:1.5px solid var(--border);color:var(--text);border-radius:8px;font-size:.9rem;"
+                        onclick="toggleSidebar()" aria-label="Toggle sidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <span class="admin-topbar-title">{% block page_title %}Dashboard{% endblock %}</span>
+            </div>
+
+            <!-- TOPBAR RIGHT: THEME TOGGLE + USER PILL (CLICKS OPEN DRAWER) -->
+            <div class="d-flex align-items-center gap-3">
+                <button class="theme-btn" onclick="toggleTheme()" type="button" aria-label="Toggle Dark/Light Theme" title="Toggle Theme">
+                    <i class="fa-solid fa-sun light-icon"></i>
+                    <i class="fa-solid fa-moon dark-icon"></i>
+                </button>
+
+                <div class="dropdown">
+                    <div class="admin-user-info"
+                         id="adminUserDropdown"
+                         data-bs-toggle="dropdown"
+                         aria-expanded="false"
+                         role="button"
+                         tabindex="0"
+                         title="Account &amp; Settings">
+                        <div class="admin-avatar-sm">
+                            {% if session.get('admin_profile_image') %}
+                                <img src="{{ url_for('static', filename='uploads/admin_profiles/' ~ session.get('admin_profile_image')) }}"
+                                     alt="{{ session.get('admin_name', 'Admin') }}"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';">
+                                <span style="display:none;">{{ session.get('admin_name', 'A')[0].upper() }}</span>
+                            {% else %}
+                                <span>{{ session.get('admin_name', 'A')[0].upper() }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="admin-user-text">
+                            <div class="admin-user-name">{{ session.get('admin_name', 'Admin') }}</div>
+                            <div class="admin-user-role">
+                                <span>Administrator</span>
+                                <i class="fa-solid fa-chevron-down ms-1"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DROPDOWN MENU (Matches Customer Style) -->
+                    <ul class="dropdown-menu dropdown-menu-end shadow border mt-2 p-2" aria-labelledby="adminUserDropdown" style="min-width: 250px; border-radius: var(--radius); background-color: var(--card); border-color: var(--border) !important;">
+                        <li class="px-3 py-2 border-bottom mb-2" style="border-color: var(--border) !important;">
+                            <div class="fw-bold small text-truncate" style="color:var(--text); max-width: 210px;">{{ session.get('admin_name', 'Administrator') }}</div>
+                            <div class="text-muted text-truncate" style="font-size: .75rem; max-width: 210px;">{{ session.get('admin_email', 'admin@zing-zing.com') }}</div>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill mt-1" style="font-size: .68rem;">
+                                <i class="fa-solid fa-shield-halved me-1"></i> Administrator Account
+                            </span>
+                        </li>
+                        <li>
+                            <a class="dropdown-item rounded py-2 small d-flex align-items-center gap-2" href="/admin/profile">
+                                <i class="fa-solid fa-id-card text-primary" style="width: 18px;"></i> My Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item rounded py-2 small d-flex align-items-center gap-2" href="/admin/edit-profile">
+                                <i class="fa-solid fa-user-pen text-info" style="width: 18px;"></i> Edit Profile &amp; Photo
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item rounded py-2 small d-flex align-items-center gap-2" href="/admin-dashboard">
+                                <i class="fa-solid fa-gauge-high text-warning" style="width: 18px;"></i> Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item rounded py-2 small d-flex align-items-center gap-2" href="/admin/item-list">
+                                <i class="fa-solid fa-boxes-stacked text-success" style="width: 18px;"></i> Product List
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item rounded py-2 small d-flex align-items-center gap-2" href="/admin/add-item">
+                                <i class="fa-solid fa-circle-plus text-primary" style="width: 18px;"></i> Add Product
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider my-2" style="border-color: var(--border);"></li>
+                        <li>
+                            <a class="dropdown-item rounded py-2 small text-danger d-flex align-items-center gap-2 fw-semibold" href="/admin-logout">
+                                <i class="fa-solid fa-right-from-bracket" style="width: 18px;"></i> Sign Out
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </header>
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-stack" style="top:70px;">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            <i class="fa-solid
+                                {% if category == 'success' %}fa-circle-check
+                                {% elif category in ('danger','error') %}fa-circle-xmark
+                                {% elif category == 'warning' %}fa-triangle-exclamation
+                                {% else %}fa-circle-info{% endif %}
+                            "></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- PAGE CONTENT -->
+        <main class="admin-main">
+            <div class="container-fluid px-0">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+    </div>
+
+</div>
+
+
+
+
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('admin-sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (sidebar) sidebar.classList.toggle('open');
+    if (backdrop) backdrop.classList.toggle('active');
+}
+
+// Theme handling
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-bs-theme') === 'light' ? 'light' : 'dark';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+}
+
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('zing_theme', theme);
+    updateThemeUI(theme);
+}
+
+function updateThemeUI(theme) {
+    const label = document.getElementById('drawerThemeLabel');
+    if (label) {
+        label.textContent = theme === 'light' ? 'Light Theme Active' : 'Dark Theme Active';
+    }
+    const closeBtn = document.getElementById('drawerCloseBtn');
+    if (closeBtn) {
+        if (theme === 'light') {
+            closeBtn.classList.remove('btn-close-white');
+        } else {
+            closeBtn.classList.add('btn-close-white');
+        }
+    }
+}
+
+// Auto-dismiss flash & init theme UI
+document.addEventListener("DOMContentLoaded", function () {
+    const currentTheme = localStorage.getItem('zing_theme') || 'light';
+    updateThemeUI(currentTheme);
+
+    document.querySelectorAll(".flash-message").forEach(function (msg) {
+        setTimeout(function () {
+            msg.style.transition = "opacity .5s ease, transform .5s ease";
+            msg.style.opacity = "0";
+            msg.style.transform = "translateY(-10px)";
+            setTimeout(function () { msg.remove(); }, 500);
+        }, 4000);
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+
+</body>
+</html>
