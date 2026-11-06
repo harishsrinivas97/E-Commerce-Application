@@ -1502,44 +1502,100 @@ img {
   }
 }
 
-/* ── 3. MAIN NAVBAR & MOBILE SEARCH ───────────────────────── */
-@media (max-width: 767.98px) {
+/* ── 3. MAIN NAVBAR & MOBILE SEARCH (KEEPS SEARCH IN CENTER ON ALL SCREENS) ───────────────────────── */
+@media (max-width: 991.98px) {
   .header-inner {
-    height: auto !important;
-    min-height: 56px;
-    padding: 8px 0;
-    flex-wrap: wrap;
-    gap: 8px;
+    height: 60px !important;
+    min-height: 60px !important;
+    padding: 0 4px !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
   }
   
   .site-brand {
     font-size: 1.2rem;
     gap: 6px;
+    flex-shrink: 0 !important;
   }
   .site-brand-icon {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     font-size: .9rem;
   }
   
+  /* Keep Search Bar strictly in the CENTER on both tablet and mobile */
   .header-search {
-    order: 3;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-top: 2px;
+    order: 0 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: 540px !important;
+    margin: 0 !important;
+  }
+  .search-form {
+    width: 100%;
   }
   .search-input {
-    padding: 9px 42px 9px 12px;
-    font-size: .88rem;
+    height: 38px;
+    padding: 6px 36px 6px 12px;
+    font-size: .86rem;
+    text-overflow: ellipsis;
+  }
+  .search-btn {
+    width: 32px;
+    height: 38px;
+    font-size: .85rem;
+  }
+  
+  .mobile-header-actions {
+    flex-shrink: 0 !important;
+    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .header-inner {
+    height: 56px !important;
+    min-height: 56px !important;
+    gap: 6px !important;
+  }
+  .site-brand {
+    font-size: 1.1rem;
+    gap: 5px;
+  }
+  .site-brand-icon {
+    width: 30px;
+    height: 30px;
+    font-size: .82rem;
+  }
+  .search-input {
+    height: 36px;
+    padding: 5px 32px 5px 10px;
+    font-size: .82rem;
+  }
+  .search-btn {
+    width: 30px;
+    height: 36px;
+    font-size: .8rem;
   }
 }
 
 @media (max-width: 390px) {
+  .header-inner {
+    gap: 4px !important;
+  }
   .site-brand-name {
-    font-size: 1.05rem;
+    font-size: .98rem;
+  }
+  .site-brand-icon {
+    width: 28px;
+    height: 28px;
   }
   .top-announcement span {
     font-size: .7rem;
+  }
+  .search-input {
+    padding: 4px 28px 4px 8px;
+    font-size: .78rem;
   }
 }
 
