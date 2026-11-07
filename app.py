@@ -18,8 +18,7 @@ from io import BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.units import mm
-from reportlab.platypus import (SimpleDocTemplate, Table, TableStyle,
-                                Paragraph, Spacer, HRFlowable)
+from reportlab.platypus import (SimpleDocTemplate,Table,TableStyle,Paragraph,Spacer,HRFlowable,Image)
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 
@@ -669,7 +668,7 @@ def update_item(item_id):
 
     product = cursor.fetchone()
 
-    if not product: 
+    if not product:
         cursor.close()
         conn.close()
         flash("Product not found or unauthorized!", "danger")
@@ -679,7 +678,7 @@ def update_item(item_id):
 
     # 3ï¸âƒ£ If admin uploaded a new image â†’ replace it
     if new_image and new_image.filename != "":
-        
+
         # Secure filename
         from werkzeug.utils import secure_filename
         new_filename = secure_filename(new_image.filename)
@@ -1586,9 +1585,9 @@ def user_view_product(product_id):
     try:
         # Fetch product with seller name
         cursor.execute("""
-            SELECT p.*, a.name AS seller_name 
-            FROM products p 
-            LEFT JOIN admin a ON p.admin_id = a.admin_id 
+            SELECT p.*, a.name AS seller_name
+            FROM products p
+            LEFT JOIN admin a ON p.admin_id = a.admin_id
             WHERE p.product_id = %s
         """, (product_id,))
         product = cursor.fetchone()
@@ -2189,7 +2188,7 @@ def payment_success():
         flash("Payment details are missing.", "error")
         return redirect(url_for('view_cart'))
 
-    # Check that this Razorpay order belongs to this session
+    # Verify that this Razorpay order belongs to the current session
     if razorpay_order_id != session.get('razorpay_order_id'):
         flash("Invalid payment order.", "error")
         return redirect(url_for('view_cart'))
@@ -2198,14 +2197,14 @@ def payment_success():
     cursor = None
 
     try:
-        # Verify Razorpay signature
+        # 1. Verify Razorpay payment signature
         razorpay_client.utility.verify_payment_signature({
             'razorpay_order_id': razorpay_order_id,
             'razorpay_payment_id': payment_id,
             'razorpay_signature': signature
         })
 
-        # Fetch payment details directly from Razorpay
+        # 2. Fetch payment details from Razorpay
         payment = razorpay_client.payment.fetch(payment_id)
 
         if payment.get('status') != 'captured':
@@ -2218,7 +2217,11 @@ def payment_success():
 
         expected_amount = session.get('razorpay_amount')
 
-        if expected_amount is None or int(payment.get('amount', 0)) != int(expected_amount):
+        if expected_amount is None:
+            flash("Payment amount information is missing.", "error")
+            return redirect(url_for('view_cart'))
+
+        if int(payment.get('amount', 0)) != int(expected_amount):
             flash("Payment amount does not match.", "error")
             return redirect(url_for('view_cart'))
 
@@ -2226,18 +2229,16 @@ def payment_success():
             flash("Invalid payment currency.", "error")
             return redirect(url_for('view_cart'))
 
+        # 3. Connect to database
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Prevent duplicate order insertion if callback is repeated
-        cursor.execute(
-            """
+        # 4. Prevent duplicate order insertion
+        cursor.execute("""
             SELECT order_id
             FROM orders
             WHERE razorpay_order_id = %s
-            """,
-            (razorpay_order_id,)
-        )
+        """, (razorpay_order_id,))
 
         existing_order = cursor.fetchone()
 
@@ -2245,7 +2246,7 @@ def payment_success():
             order_db_id = existing_order['order_id']
 
         else:
-
+            # 5. Get checkout details from session
             delivery_address = session.get('delivery_address', {})
             cart = session.get('cart', {})
             selected_ids = session.get('checkout_selected_ids', [])
@@ -2257,22 +2258,25 @@ def payment_success():
             }
 
             if not selected_items:
-                flash("Selected products are no longer available in your cart.", "error")
+                flash(
+                    "Selected products are no longer available in your cart.",
+                    "error"
+                )
                 return redirect(url_for('view_cart'))
 
-            # Recalculate the total on the server
+            # 6. Recalculate total amount on the server
             total_amount = sum(
                 Decimal(str(item['price'])) * int(item['quantity'])
                 for item in selected_items.values()
             )
 
+            # Validate amount against Razorpay order amount
             if int(total_amount * 100) != int(expected_amount):
                 flash("Order amount validation failed.", "error")
                 return redirect(url_for('view_cart'))
 
-            # Insert main order
-            cursor.execute(
-                """
+            # 7. Insert main order
+            cursor.execute("""
                 INSERT INTO orders (
                     user_id,
                     razorpay_order_id,
@@ -2294,37 +2298,37 @@ def payment_success():
                     %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s
                 )
-                """,
-                (
-                    session['user_id'],
-                    razorpay_order_id,
-                    payment_id,
-                    signature,
-                    total_amount,
-                    'INR',
-                    'PAID',
-                    'PLACED',
-                    delivery_address.get('full_name', ''),
-                    delivery_address.get('phone', ''),
-                    delivery_address.get('address_line', ''),
-                    delivery_address.get('city', ''),
-                    delivery_address.get('state', ''),
-                    delivery_address.get('pincode', ''),
-                    delivery_address.get('landmark', '')
-                )
-            )
+            """, (
+                session['user_id'],
+                razorpay_order_id,
+                payment_id,
+                signature,
+
+                # Convert Decimal to float for SQLite
+                float(total_amount),
+
+                'INR',
+                'PAID',
+                'PLACED',
+                delivery_address.get('full_name', ''),
+                delivery_address.get('phone', ''),
+                delivery_address.get('address_line', ''),
+                delivery_address.get('city', ''),
+                delivery_address.get('state', ''),
+                delivery_address.get('pincode', ''),
+                delivery_address.get('landmark', '')
+            ))
 
             order_db_id = cursor.lastrowid
 
-            # Insert individual purchased products
+            # 8. Insert purchased products into order_items
             for product_id, item in selected_items.items():
 
                 price = Decimal(str(item['price']))
                 quantity = int(item['quantity'])
                 subtotal = price * quantity
 
-                cursor.execute(
-                    """
+                cursor.execute("""
                     INSERT INTO order_items (
                         order_id,
                         product_id,
@@ -2335,22 +2339,22 @@ def payment_success():
                         subtotal
                     )
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    """,
-                    (
-                        order_db_id,
-                        int(product_id),
-                        item.get('name', 'Product'),
-                        item.get('image', ''),
-                        price,
-                        quantity,
-                        subtotal
-                    )
-                )
+                """, (
+                    order_db_id,
+                    int(product_id),
+                    item.get('name', 'Product'),
+                    item.get('image', ''),
 
-            # Save order and items together
+                    # Convert Decimal values to float for SQLite
+                    float(price),
+                    quantity,
+                    float(subtotal)
+                ))
+
+            # 9. Commit order and order items
             conn.commit()
 
-            # Remove only purchased products from cart
+            # 10. Remove purchased quantities from cart
             cart = session.get('cart', {})
 
             for product_id, item in selected_items.items():
@@ -2366,11 +2370,14 @@ def payment_success():
                     cart.pop(product_id, None)
 
             session['cart'] = cart
-            session.pop('checkout_selected_ids', None)
-            session.pop('razorpay_order_id', None)
-            session.pop('razorpay_amount', None)
-            session.modified = True
 
+        # 11. Clear checkout session after successful processing
+        session.pop('checkout_selected_ids', None)
+        session.pop('razorpay_order_id', None)
+        session.pop('razorpay_amount', None)
+        session.modified = True
+
+        # 12. Display payment success page
         return render_template(
             'user/payment_success.html',
             payment_id=payment_id,
@@ -2380,14 +2387,19 @@ def payment_success():
 
     except Exception as e:
 
+        # Rollback database changes if something fails
         if conn:
             conn.rollback()
 
-        print("Payment verification / database error:", e)
+        # Print complete error details in terminal
+        print("\n========== PAYMENT ERROR ==========")
+        print("Error:", str(e))
+        traceback.print_exc()
+        print("====================================\n")
 
         flash(
-            "Payment could not be recorded. Please contact support with your payment ID: "
-            + str(payment_id),
+            "Payment could not be recorded. Please contact support with "
+            "your payment ID: " + str(payment_id),
             "error"
         )
 
@@ -2395,6 +2407,7 @@ def payment_success():
 
     finally:
 
+        # Close database resources
         if cursor:
             cursor.close()
 
@@ -2567,7 +2580,7 @@ def _generate_invoice_pdf(order, items, customer):
     s_sub        = ps('sub',       fontSize=8.5, fontName='Helvetica',      textColor=TEXT_MUTED, leading=11)
     s_inv_title  = ps('inv_t',     fontSize=16, fontName='Helvetica-Bold', textColor=TEXT_MAIN, alignment=TA_RIGHT, leading=18)
     s_inv_meta   = ps('inv_m',     fontSize=8.5, fontName='Helvetica',      textColor=TEXT_MUTED, alignment=TA_RIGHT, leading=12)
-    
+
     s_sec_title  = ps('sec_t',     fontSize=8.5, fontName='Helvetica-Bold', textColor=TEXT_MUTED, textTransform='uppercase', leading=10)
     s_cust_name  = ps('cust_n',    fontSize=10, fontName='Helvetica-Bold', textColor=TEXT_MAIN, leading=13)
     s_cust_body  = ps('cust_b',    fontSize=8.5, fontName='Helvetica',      textColor=TEXT_MAIN, leading=12)
@@ -2678,12 +2691,13 @@ def _generate_invoice_pdf(order, items, customer):
     story.append(info_tbl)
     story.append(Spacer(1, 6*mm))
 
-    # 3. Simple Items Table (Clean, no clutter, no HSN codes)
-    # Total width = 174mm
-    # # (10mm), Item Description (94mm), Price (26mm), Qty (16mm), Total (28mm)
-    col_w = [10*mm, 94*mm, 26*mm, 16*mm, 28*mm]
+    # 3. Items Table with Product Images
+
+    col_w = [8*mm, 20*mm, 72*mm, 26*mm, 16*mm, 32*mm]
+
     table_data = [[
         Paragraph('#', th_c),
+        Paragraph('IMAGE', th_c),
         Paragraph('ITEM DESCRIPTION', th_l),
         Paragraph('PRICE', th_r),
         Paragraph('QTY', th_c),
@@ -2691,15 +2705,39 @@ def _generate_invoice_pdf(order, items, customer):
     ]]
 
     subtotal = Decimal('0')
+
     for idx, itm in enumerate(items, 1):
+
         p_name = itm.get('product_name', 'Product')
         price = Decimal(str(itm.get('price', 0)))
         qty = int(itm.get('quantity', 0))
         item_sub = Decimal(str(itm.get('subtotal', price * qty)))
+
         subtotal += item_sub
+
+        image_name = itm.get('product_image', '')
+
+        image_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            'static',
+            'uploads',
+            'product_images',
+            os.path.basename(image_name)
+        ) if image_name else ''
+
+        if image_path and os.path.isfile(image_path):
+            product_image = Image(
+                image_path,
+                width=15*mm,
+                height=15*mm
+            )
+            product_image.hAlign = 'CENTER'
+        else:
+            product_image = Paragraph('No Image', td_c)
 
         table_data.append([
             Paragraph(str(idx), td_c),
+            product_image,
             Paragraph(f'<b>{p_name}</b>', td_l),
             Paragraph(f'Rs. {price:,.2f}', td_r),
             Paragraph(str(qty), td_c),
@@ -2707,6 +2745,7 @@ def _generate_invoice_pdf(order, items, customer):
         ])
 
     items_table = Table(table_data, colWidths=col_w, repeatRows=1)
+
     items_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), TABLE_HDR),
         ('TOPPADDING', (0,0), (-1,0), 6),
@@ -2720,8 +2759,10 @@ def _generate_invoice_pdf(order, items, customer):
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ('LINEBELOW', (0,1), (-1,-1), 0.5, BORDER_CLR),
     ]))
+
     story.append(items_table)
     story.append(Spacer(1, 4*mm))
+
 
     # 4. Summary Totals (Clean, simple, right-aligned)
     grand_total = Decimal(str(order.get('total_amount', subtotal)))
